@@ -1,0 +1,14 @@
+name: atmosphere-virtual-lab
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - coda
+  - ipyleaflet=0.15.0
+  - harp
+  - panel
+  - pyproj
+  - vtk
+  - plotly
+  - numpy
+  - scipy
