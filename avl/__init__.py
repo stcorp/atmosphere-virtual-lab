@@ -1,4 +1,5 @@
 import datetime
+import os
 import re
 
 import coda
@@ -31,8 +32,19 @@ UNPREFERED_PATTERNS = [
 ]
 
 
-def download(files):  # TODO
-    pass
+def download(files, target_directory="."):
+    if isinstance(files, list) or isinstance(files, tuple):
+        return [download(file) for file in files]
+    filename = os.path.basename(files)
+    targetpath = os.path.join(target_directory, filename)
+    if not os.path.exists(targetpath):
+        url = "https://atmospherevirtuallab.org/files/" + filename
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(os.path.join(target_directory, filename), 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+    return filename
 
 
 class _objdict(dict):
