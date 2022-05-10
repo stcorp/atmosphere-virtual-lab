@@ -8,5 +8,5 @@ setup(
     description="Top-level package for an Atmosphere Virtual Lab installation",
     license="BSD",
     packages=["avl"],
-    install_requires=["requests", "numpy", "panel", "folium", "plotly", "pyproj", "vtk", "harp", "coda", "ipyleaflet", "scipy"],
+    install_requires=["requests", "numpy", "panel", "plotly", "pyproj", "vtk", "harp", "coda", "ipyleaflet", "scipy"],
 )
