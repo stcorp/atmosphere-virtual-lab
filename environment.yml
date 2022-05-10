@@ -1,4 +1,4 @@
-name: atmosphere-virtual-lab
+name: avl
 channels:
   - conda-forge
 dependencies:
