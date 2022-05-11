@@ -11,10 +11,7 @@ import io
 from vtk.numpy_interface.dataset_adapter import numpyTovtkDataArray
 import vtk.util.numpy_support # TODO use newer numpy_interface?
 
-try: # TODO investigate
-    from ipyleaflet_feature_gl_layer_plugin.ipyleaflet_feature_gl_layer import FeatureGlLayer, FeatureGlLayerWrapper
-except ImportError:
-    pass
+from ipyleaflet_gl_vector_layer import IpyleafletGlVectorLayer, IpyleafletGlVectorLayerWrapper
 
 panel.extension('vtk')
 panel.extension('plotly')
@@ -100,8 +97,8 @@ class MapPlot:
         plot_type = None
         if(kwargs['data_type'] is not None):
             plot_type = plot_types[kwargs['data_type']]
-        featureGlWrapper = FeatureGlLayerWrapper()
-        featureGlLayer = FeatureGlLayer(lat=latitude, lon=longitude, data=data, colorrange=list(kwargs["colorrange"]), plot_type=plot_type)
+        featureGlWrapper = IpyleafletGlVectorLayerWrapper()
+        featureGlLayer = IpyleafletGlVectorLayer(lat=latitude, lon=longitude, data=data, colorrange=list(kwargs["colorrange"]), plot_type=plot_type)
         self._map.add_layer(featureGlWrapper)
         featureGlWrapper.add_layer(featureGlLayer)
 
