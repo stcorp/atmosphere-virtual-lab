@@ -50,8 +50,8 @@ The following types of data traces are currently supported:
 - Geo3D
 - Volume
 
-There are three of plots that can also be individually instantiated, then
-populated with compatible data traces:
+There are three types of plots that can also be individually instantiated, and
+populated with (compatible) data traces:
 
 - Plot
 - MapPlot
