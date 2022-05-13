@@ -58,7 +58,7 @@ populated with compatible data traces:
 - MapPlot3D
 
 Data traces are in themselves also plots (with a single data trace), so
-can also be shown interactively.
+can be shown interactively without requiring a separate plot.
 
 Example usage:
 
@@ -73,9 +73,19 @@ Combining data traces:
 
 """
 
+# TODO is 'value' the right name for a Harp variable?
+
 
 def download(files, target_directory="."):
-    if isinstance(files, list) or isinstance(files, tuple):
+    """
+    Download file(s) from `atmospherevirtuallab.org, skipping files
+    that already exist.
+
+    Arguments:
+    files -- file name or list/tuple of file names
+    target_directory -- path where to store files (default '.')
+    """
+    if isinstance(files, (list, tuple)):
         return [download(file) for file in files]
     filename = os.path.basename(files)
     targetpath = os.path.join(target_directory, filename)
@@ -474,6 +484,16 @@ def volume_data(product, value, grid='cartesian', **kwargs):
 
 
 def Volume(product, value, **kwargs):
+    """
+    Return a Volume data trace for the given Harp variable.
+
+    Volume data traces cannot currently be added together.
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
     data = volume_data(product, value, **kwargs)
     return vis.VolumePlot(**data, **kwargs)
 
@@ -493,6 +513,16 @@ def histogram_data(product, value, **kwargs):
 
 
 def Histogram(product, value, **kwargs):
+    """
+    Return a Histogram data trace for the given Harp variable.
+
+    Compatible plot type: `Plot`
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
     data = histogram_data(product, value)
     return vis.Histogram(**data, **kwargs)
 
@@ -502,6 +532,16 @@ def scatter_data(product, value, **kwargs):
 
 
 def Scatter(product, value, **kwargs):
+    """
+    Return a Scatter data trace for the given Harp variable.
+
+    Compatible plot type: `Plot`
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
     data = _plot_data(product, value)
     return vis.Scatter(**data, **kwargs)
 
@@ -516,6 +556,16 @@ def heatmap_data(product, value, **kwargs):
 
 
 def Heatmap(product, value, **kwargs):
+    """
+    Return a Heatmap data trace for the given Harp variable.
+
+    Compatible plot type: `Plot`
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
     data = heatmap_data(product, value)
     return vis.Heatmap(**data, **kwargs)
 
@@ -525,6 +575,16 @@ def geo_data(product, value, **kwargs):
 
 
 def Geo(product, value, **kwargs):
+    """
+    Return a Geo data trace for the given Harp variable.
+
+    Compatible plot type: `MapPlot`
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
     data = geo_data(product, value)
     return vis.Geo(**data, **kwargs)
 
@@ -533,6 +593,16 @@ def geo3d_data(product, value, **kwargs):
     return _mapplot_data(product, value)
 
 
-def Geo3D(product, value, **kwargs):  # TODO merge with Geo? or actually convenient like this..
+def Geo3D(product, value, **kwargs):
+    """
+    Return a Geo3D data trace for the given Harp variable.
+
+    Compatible plot type: `MapPlot3D`
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
     data = geo3d_data(product, value)
     return vis.Geo3D(**data, **kwargs)
