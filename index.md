@@ -6,7 +6,7 @@ Atmosphere Virtual Lab
 A toolkit for interactive plotting of atmospheric data.
 
 Given a Harp product and variable name, it extracts data as well as meta-data
-to automatically produce a data trace.
+to automatically produce an annotated data trace.
 
 The following types of data traces are currently supported:
 
@@ -49,7 +49,7 @@ Combining data traces:
 download(files, target_directory=".")
 ```
 
-Download file(s) from `atmospherevirtuallab.org, skipping files
+Download file(s) from `atmospherevirtuallab.org`, skipping files
 that already exist.
 
 **Arguments**:
