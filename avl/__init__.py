@@ -11,6 +11,8 @@ from scipy.interpolate import griddata
 
 from . import vis
 
+from .vis import Plot, MapPlot, MapPlot3D
+
 
 UNPREFERED_PATTERNS = [
     "index", "collocation_index", "orbit_index", ".*subindex", "scan_direction_type",
@@ -30,6 +32,46 @@ UNPREFERED_PATTERNS = [
     ".*pressure",
     ".*_angle"
 ]
+
+"""
+Atmosphere Virtual Lab
+
+A toolkit for interactive plotting of atmospheric data.
+
+Given a Harp product and variable name, it extracts data as well as meta-data
+to automatically produce a data trace.
+
+The following types of data traces are currently supported:
+
+- Scatter
+- Histogram
+- Heatmap
+- Geo
+- Geo3D
+- Volume
+
+There are three of plots that can also be individually instantiated, then
+populated with compatible data traces:
+
+- Plot
+- MapPlot
+- MapPlot3D
+
+Data traces are in themselves also plots (with a single data trace), so
+can also be shown interactively.
+
+Example usage:
+
+  avl.Scatter(product, 'variable name')
+
+Combining data traces:
+
+  plot = avl.MapPlot()
+  plot.add(avl.Geo(product, 'var1'))
+  plot.add(avl.Geo(product, 'var2'))
+  plot
+
+"""
 
 
 def download(files, target_directory="."):
