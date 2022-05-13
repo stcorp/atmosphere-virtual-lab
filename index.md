@@ -1,9 +1,6 @@
 <a name="avl"></a>
 # avl
 
-<a name="avl.UNPREFERED_PATTERNS"></a>
-#### UNPREFERED\_PATTERNS
-
 Atmosphere Virtual Lab
 
 A toolkit for interactive plotting of atmospheric data.
