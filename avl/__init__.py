@@ -64,9 +64,9 @@ class _objdict(dict):
             raise AttributeError("No such attribute: " + name)
 
 
-def get_prefered_value(values, unprefered_patterns):
+def _get_prefered_value(values, unprefered_patterns):
     if unprefered_patterns:
-        value = get_prefered_value([value for value in values if not re.match(unprefered_patterns[0], value)],
+        value = _get_prefered_value([value for value in values if not re.match(unprefered_patterns[0], value)],
                                    unprefered_patterns[1:])
         if value is not None:
             return value
@@ -75,7 +75,7 @@ def get_prefered_value(values, unprefered_patterns):
     return None
 
 
-def get_attributes(product):
+def _get_attributes(product):
     # we return all scalars and 1D (time dependent) variables
     def attr_value(value, variable):
         if hasattr(variable, "unit"):
@@ -100,7 +100,7 @@ def get_attributes(product):
     return attr
 
 
-def get_midpoint_axis_from_bounds(bounds_variable, log=False):
+def _get_midpoint_axis_from_bounds(bounds_variable, log=False):
     if bounds_variable.data.shape[-1] != 2 or bounds_variable.dimension[-1] is not None:
         raise ValueError("bounds variable should end with independent dimension of length 2")
     if log:
@@ -110,7 +110,7 @@ def get_midpoint_axis_from_bounds(bounds_variable, log=False):
     return harp.Variable(data, bounds_variable.dimension[:-1], bounds_variable.unit)
 
 
-def plot_data(product, value=None, average=False):
+def _plot_data(product, value=None, average=False):
     if not isinstance(product, harp.Product):
         raise TypeError("Expecting a HARP product")
 
@@ -135,7 +135,7 @@ def plot_data(product, value=None, average=False):
         if value not in variable_names:
             raise ValueError("product variable is not plottable ('%s')" % value)
     else:
-        value = get_prefered_value(variable_names, UNPREFERED_PATTERNS)
+        value = _get_prefered_value(variable_names, UNPREFERED_PATTERNS)
 
     if value is None:
         raise ValueError("HARP product is not plotable")
@@ -162,16 +162,16 @@ def plot_data(product, value=None, average=False):
             if 'altitude' in product:
                 ydata = product['altitude']
             elif 'altitude_bounds' in product:
-                ydata = get_midpoint_axis_from_bounds(product['altitude_bounds'])
+                ydata = _get_midpoint_axis_from_bounds(product['altitude_bounds'])
             elif 'pressure' in product:
                 ydata = product['pressure']
                 prop["ylog"] = True
             elif 'pressure_bounds' in product:
-                ydata = get_midpoint_axis_from_bounds(product['pressure_bounds'], log=True)
+                ydata = _get_midpoint_axis_from_bounds(product['pressure_bounds'], log=True)
                 prop["ylog"] = True
             if ydata is None:
                 raise ValueError("Could not determine y-axis for vertical profile data ('%s')" % value)
-        attr = get_attributes(product)
+        attr = _get_attributes(product)
     else:
         if 'datetime' in product:
             xdata = product['datetime']
@@ -260,7 +260,7 @@ kSwathData = 1
 kGridData = 2
 
 
-def mapplot_data(product, value=None, locationOnly=False):
+def _mapplot_data(product, value=None, locationOnly=False):
     if not isinstance(product, harp.Product):
         raise TypeError("Expecting a HARP product")
 
@@ -287,8 +287,8 @@ def mapplot_data(product, value=None, locationOnly=False):
                 raise ValueError("independent dimension of latitude and longitude bounds should have "
                                  "length 2 for gridded data")
             data_type = kGridData
-            latitude = get_midpoint_axis_from_bounds(latitude_bounds)
-            longitude = get_midpoint_axis_from_bounds(longitude_bounds)
+            latitude = _get_midpoint_axis_from_bounds(latitude_bounds)
+            longitude = _get_midpoint_axis_from_bounds(longitude_bounds)
         elif not locationOnly:
             if len(latitude_bounds.dimension) != 2:
                 raise ValueError("latitude and longitude bounds should be two dimensional for non-gridded data")
@@ -355,14 +355,14 @@ def mapplot_data(product, value=None, locationOnly=False):
             if value not in variable_names:
                 raise ValueError("product variable is not plottable ('%s')" % value)
         else:
-            value = get_prefered_value(variable_names, UNPREFERED_PATTERNS)
+            value = _get_prefered_value(variable_names, UNPREFERED_PATTERNS)
 
     data = None
     attr = {}
     prop = {}
 
     if data_type == kGridData:
-        attr = get_attributes(product)
+        attr = _get_attributes(product)
         if value is None:
             raise ValueError("HARP product has no variable to use for gridded plot")
 
@@ -456,16 +456,16 @@ def Histogram(product, value, **kwargs):
 
 
 def scatter_data(product, value, **kwargs):
-    return plot_data(product, value)
+    return _plot_data(product, value)
 
 
 def Scatter(product, value, **kwargs):
-    data = plot_data(product, value)
+    data = _plot_data(product, value)
     return vis.Scatter(**data, **kwargs)
 
 
 def heatmap_data(product, value, **kwargs):
-    data = plot_data(product, value)
+    data = _plot_data(product, value)
 
     data['data'] = data['xdata']
     del data['xdata']
@@ -479,7 +479,7 @@ def Heatmap(product, value, **kwargs):
 
 
 def geo_data(product, value, **kwargs):
-    return mapplot_data(product, value)
+    return _mapplot_data(product, value)
 
 
 def Geo(product, value, **kwargs):
@@ -487,6 +487,10 @@ def Geo(product, value, **kwargs):
     return vis.Geo(**data, **kwargs)
 
 
+def geo3d_data(product, value, **kwargs):
+    return _mapplot_data(product, value)
+
+
 def Geo3D(product, value, **kwargs):  # TODO merge with Geo? or actually convenient like this..
-    data = geo_data(product, value)
+    data = geo3d_data(product, value)
     return vis.Geo3D(**data, **kwargs)
