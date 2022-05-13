@@ -62,14 +62,18 @@ can be shown interactively without requiring a separate plot.
 
 Example usage:
 
-  avl.Scatter(product, 'variable name')
+    avl.Scatter(product, 'variable name')
+
+Additional keyword arguments are passed to the underlying plot:
+
+    avl.Geo(product, 'var1', centerlat=90)
 
 Combining data traces:
 
-  plot = avl.MapPlot()
-  plot.add(avl.Geo(product, 'var1'))
-  plot.add(avl.Geo(product, 'var2'))
-  plot
+    plot = avl.MapPlot()
+    plot.add(avl.Geo(product, 'var1'))
+    plot.add(avl.Geo(product, 'var2'))
+    plot
 
 """
 
@@ -487,11 +491,12 @@ def Volume(product, value, **kwargs):
     """
     Return a Volume data trace for the given Harp variable.
 
-    Volume data traces cannot currently be added together.
+    Volume data traces cannot currently be combined in a single plot.
 
     Arguments:
     product -- Harp product
     value -- Harp variable name
+    spherical -- Project data to a sphere (default False)
 
     """
     data = volume_data(product, value, **kwargs)
@@ -521,6 +526,7 @@ def Histogram(product, value, **kwargs):
     Arguments:
     product -- Harp product
     value -- Harp variable name
+    bins -- Number of bins
 
     """
     data = histogram_data(product, value)
