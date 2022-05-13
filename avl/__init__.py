@@ -14,7 +14,7 @@ from . import vis
 from .vis import Plot, MapPlot, MapPlot3D
 
 
-UNPREFERED_PATTERNS = [
+_UNPREFERED_PATTERNS = [
     "index", "collocation_index", "orbit_index", ".*subindex", "scan_direction_type",
     "datetime.*",
     "sensor_.*",
@@ -39,7 +39,7 @@ Atmosphere Virtual Lab
 A toolkit for interactive plotting of atmospheric data.
 
 Given a Harp product and variable name, it extracts data as well as meta-data
-to automatically produce a data trace.
+to automatically produce an annotated data trace.
 
 The following types of data traces are currently supported:
 
@@ -82,7 +82,7 @@ Combining data traces:
 
 def download(files, target_directory="."):
     """
-    Download file(s) from `atmospherevirtuallab.org, skipping files
+    Download file(s) from `atmospherevirtuallab.org`, skipping files
     that already exist.
 
     Arguments:
@@ -191,7 +191,7 @@ def _plot_data(product, value=None, average=False):
         if value not in variable_names:
             raise ValueError("product variable is not plottable ('%s')" % value)
     else:
-        value = _get_prefered_value(variable_names, UNPREFERED_PATTERNS)
+        value = _get_prefered_value(variable_names, _UNPREFERED_PATTERNS)
 
     if value is None:
         raise ValueError("HARP product is not plotable")
@@ -411,7 +411,7 @@ def _mapplot_data(product, value=None, locationOnly=False):
             if value not in variable_names:
                 raise ValueError("product variable is not plottable ('%s')" % value)
         else:
-            value = _get_prefered_value(variable_names, UNPREFERED_PATTERNS)
+            value = _get_prefered_value(variable_names, _UNPREFERED_PATTERNS)
 
     data = None
     attr = {}
