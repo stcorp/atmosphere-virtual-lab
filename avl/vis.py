@@ -19,24 +19,24 @@ panel.extension(sizing_mode="stretch_width")
 
 # TODO check all visan args
 
-kPointData = 0
-kSwathData = 1
-kGridData = 2
+_kPointData = 0
+_kSwathData = 1
+_kGridData = 2
 
 
 def _data_type(latitude, longitude, data):  # TODO check that shapes match
     if data is not None and data.ndim == 2:
         if (latitude.ndim, longitude.ndim) == (1, 1):
-            data_type = kGridData
+            data_type = _kGridData
 
     elif (len(latitude.shape) == 2 and latitude.shape[-1] == 4 and
           len(longitude.shape) == 2 and longitude.shape[-1] == 4):
         if data is not None and data.ndim == 1:
-            data_type = kSwathData
+            data_type = _kSwathData
 
     elif latitude.ndim == 1 and longitude.ndim == 1:
         if data is not None and data.ndim == 1:
-            data_type = kPointData
+            data_type = _kPointData
 
     if data_type is None:
         raise Exception('invalid lat/lon/data dimensions')
@@ -164,7 +164,7 @@ class MapPlot3D:
         data_type = _data_type(latitude, longitude, data)
 
         # swath data: polygons for lat/lon boundaries
-        if data_type == kSwathData:
+        if data_type == _kSwathData:
             # data points
             arrz = np.array([0] * 4 * len(data))
             fx, fy, fz = pyproj.transform(self.p1, self.p2, longitude.flat, latitude.flat, arrz)
@@ -183,7 +183,7 @@ class MapPlot3D:
             cells[:,4] = data_idx+3
 
         # grid data: polygons across grid
-        elif data_type == kGridData:
+        elif data_type == _kGridData:
             # data points
             lon_offset = (longitude[1] - longitude[0]) / 2
             lat_offset = (latitude[1] - latitude[0]) / 2
@@ -218,7 +218,7 @@ class MapPlot3D:
             cells[:,4] = f2
 
         # point data
-        elif data_type == kPointData:
+        elif data_type == _kPointData:
             # data points
             arrz = np.zeros(len(longitude))
             fx, fy, fz = pyproj.transform(self.p1, self.p2, longitude.flat, latitude.flat, arrz)
@@ -240,7 +240,7 @@ class MapPlot3D:
         points.SetData(data_points)
         polydata.SetPoints(points)
 
-        if data_type != kPointData:
+        if data_type != _kPointData:
             polygons = vtk.vtkCellArray()
             polygons.SetCells(cells.shape[0], vtk.util.numpy_support.numpy_to_vtkIdTypeArray(cells, deep=True))
             polydata.SetPolys(polygons)
@@ -484,5 +484,3 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
     )))
 
     return fig
-
-
