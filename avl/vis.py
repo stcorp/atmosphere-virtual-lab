@@ -43,10 +43,14 @@ def _data_type(latitude, longitude, data):  # TODO check that shapes match
 
     return data_type
 
-# TODO BasePlot
 
-class Plot:
-    def __init__(self, layout=None, **kwargs):
+# TODO add BasePlot, merge add methods?
+
+class Plot:  # TODO
+    """2D Plot type
+    """
+
+    def __init__(self, layout=None, **kwargs):  # TODO name individual kwargs
         self._fig = go.Figure()
         self._traces = []
         self._data = []
@@ -55,6 +59,11 @@ class Plot:
             self._fig.update_layout(layout)
 
     def add(self, obj):
+        """Add data trace of the same plot type.
+
+        Arguments:
+        obj -- Data trace
+        """
         if isinstance(obj, Plot):
             traces = obj._traces
             data = obj._data
@@ -75,13 +84,26 @@ class Plot:
 
 
 class MapPlot:
-    def __init__(self, **kwargs):
+    """2D Map Plot type
+    """
+
+    def __init__(self, **kwargs):  # TODO name individual kwargs, and actually support more (see MapPlot3D)
+        """
+        Arguments:
+        colorrange: Color range to use (default min, max of data)
+
+        """
         self._map = ipyleaflet.Map(center=[50.0, 4.0], zoom=1, scroll_wheel_zoom=True)
-        self._traces = []  # TODO base class with MapPlot etc?
+        self._traces = []
         self._data = []
 
     def add(self, obj):
-        if isinstance(obj, MapPlot):  # TODO plot with multiple traces
+        """Add data trace of the same plot type.
+
+        Arguments:
+        obj -- Data trace
+        """
+        if isinstance(obj, MapPlot):
             traces = obj._traces
             data = obj._data
             latitude, longitude, data, kwargs = data[0]
@@ -108,9 +130,24 @@ class MapPlot:
 
 
 class MapPlot3D:
+    """3D Map Plot type
+    """
     def __init__(self, showcolorbar=True, colorrange=None, size=(640, 480),
               centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, # TODO opacity, pointsize.. per trace or global defaults?
               zoom=None, **kwargs):
+        """
+        Arguments:
+        showcolorbar -- Show colorbar (default True)
+        colorrange -- Color range to use (default min, max of data)
+        size -- Plot size in pixels (default (640, 480))
+        centerlon -- Center longitude (default 0)
+        centerlat -- Center latitude (default 0)
+        opacity -- Opacity (default 0.6)
+        pointsize -- Point size
+        heightfactor -- Scale height
+        zoom -- Zoom factor
+
+        """
         self.showcolorbar = showcolorbar
         self.colorrange = colorrange
         self.size = size
@@ -132,6 +169,11 @@ class MapPlot3D:
         self._renderer = None
 
     def add(self, obj):
+        """Add data trace of the same plot type.
+
+        Arguments:
+        obj -- Data trace
+        """
         if isinstance(obj, MapPlot3D):  # TODO plot with multiple traces
             traces = obj._traces
             data = obj._data

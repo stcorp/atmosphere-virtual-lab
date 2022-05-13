@@ -439,13 +439,13 @@ def _mapplot_data(product, value=None, locationOnly=False):
     })
 
 
-def volume_data(product, value, grid='cartesian', **kwargs):
+def volume_data(product, value, spherical=False, **kwargs):
     if not isinstance(product, harp.Product):
         raise TypeError("Expecting a HARP product")
 
     data = product[value].data
 
-    if grid == 'spherical':  # TODO I don't know if 'grid' is the right word (projection, regrid, crs..?), but since we are regridding..
+    if spherical:
         source_crs = pyproj.CRS('epsg:4326')
         target_crs = pyproj.crs.GeocentricCRS('epsg:6326')
 
@@ -570,6 +570,7 @@ def Heatmap(product, value, **kwargs):
     Arguments:
     product -- Harp product
     value -- Harp variable name
+    gap_threshold -- Add gaps when larger (np.timedelta, default 24h)
 
     """
     data = heatmap_data(product, value)
