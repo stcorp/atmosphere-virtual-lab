@@ -11,7 +11,10 @@ import io
 from vtk.numpy_interface.dataset_adapter import numpyTovtkDataArray
 import vtk.util.numpy_support # TODO use newer numpy_interface?
 
-from ipyleaflet_gl_vector_layer import IpyleafletGlVectorLayer, IpyleafletGlVectorLayerWrapper
+try:
+    from ipyleaflet_gl_vector_layer import IpyleafletGlVectorLayer, IpyleafletGlVectorLayerWrapper
+except ImportError:
+    pass
 
 panel.extension('vtk')
 panel.extension('plotly')
