@@ -122,7 +122,7 @@ class MapPlot:
             self._data.append(obj.data)
         else:
             latitude, longitude, data, kwargs = obj
-        plot_types = dict([(0, 'point'), (1, 'swath'), (2, 'grid')])
+        plot_types = dict([(0, 'points'), (1, 'swath'), (2, 'grid')])
         plot_type = None
         if(self._data_type is not None):
             plot_type = plot_types[self._data_type]
