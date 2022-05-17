@@ -1,6 +1,6 @@
 import datetime
 import os
-
+from ipywidgets import Layout
 import ipyleaflet
 import numpy as np
 import panel
@@ -90,15 +90,19 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, **kwargs):  # TODO name individual kwargs, and actually support more (see MapPlot3D)
+    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 640), **kwargs):  # TODO name individual kwargs, and actually support more (see MapPlot3D)
         """
         Arguments:
         colorrange: Color range to use (default min, max of data)
 
         """
-        self._map = ipyleaflet.Map(center=[50.0, 4.0], zoom=1, scroll_wheel_zoom=True)
+        self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom, scroll_wheel_zoom=True, layout=Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px'))
         self._traces = []
         self._data = []
+        self._pointsize = pointsize
+        self._opacity = opacity
+        self._data_type = data_type
+        self._colorrange = colorrange
 
     def add(self, obj):
         """Add data trace of the same plot type.
@@ -120,10 +124,19 @@ class MapPlot:
             latitude, longitude, data, kwargs = obj
         plot_types = dict([(0, 'point'), (1, 'swath'), (2, 'grid')])
         plot_type = None
-        if(kwargs['data_type'] is not None):
-            plot_type = plot_types[kwargs['data_type']]
+        if(self._data_type is not None):
+            plot_type = plot_types[self._data_type]
         featureGlWrapper = IpyleafletGlVectorLayerWrapper()
-        featureGlLayer = IpyleafletGlVectorLayer(lat=latitude, lon=longitude, data=data, colorrange=list(kwargs["colorrange"]), plot_type=plot_type)
+        args = {
+            "lat": latitude,
+            "lon": longitude,
+            "data": data,
+            "colorrange": list(self._colorrange) if self._colorrange else None,
+            "plot_type": plot_type,
+            "pointsize": self._pointsize,
+            "opacity": self._opacity
+        }
+        featureGlLayer = IpyleafletGlVectorLayer(**args)
         self._map.add_layer(featureGlWrapper)
         featureGlWrapper.add_layer(featureGlLayer)
 
