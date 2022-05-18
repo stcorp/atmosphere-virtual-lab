@@ -94,10 +94,16 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 640), **kwargs):  # TODO name individual kwargs, and actually support more (see MapPlot3D)
+    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 640), **kwargs):
         """
         Arguments:
+        centerlon -- Center longitude (default 0)
+        centerlat -- Center latitude (default 0)
         colorrange: Color range to use (default min, max of data)
+        opacity -- Opacity (default 0.6)
+        pointsize -- Point size
+        size -- Plot size in pixels (default (640, 480))
+        zoom -- Zoom factor
 
         """
         self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom, scroll_wheel_zoom=True, layout=Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px'))
@@ -157,14 +163,14 @@ class MapPlot3D:
               zoom=None, **kwargs):
         """
         Arguments:
-        showcolorbar -- Show colorbar (default True)
-        colorrange -- Color range to use (default min, max of data)
-        size -- Plot size in pixels (default (640, 480))
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
+        colorrange -- Color range to use (default min, max of data)
+        heightfactor -- Scale height
         opacity -- Opacity (default 0.6)
         pointsize -- Point size
-        heightfactor -- Scale height
+        showcolorbar -- Show colorbar (default True)
+        size -- Plot size in pixels (default (640, 480))
         zoom -- Zoom factor
 
         """
