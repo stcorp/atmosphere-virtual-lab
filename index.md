@@ -200,6 +200,12 @@ __init__(**kwargs)
 **Arguments**:
 
 - `colorrange` - Color range to use (default min, max of data)
+- `size` - Plot size in pixels (default (640, 480))
+- `centerlon` - Center longitude (default 0)
+- `centerlat` - Center latitude (default 0)
+- `opacity` - Opacity (default 0.6)
+- `pointsize` - Point size
+- `zoom` - Zoom factor
 
 <a name="avl.vis.MapPlot.add"></a>
 #### add
