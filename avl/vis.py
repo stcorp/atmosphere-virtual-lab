@@ -1,5 +1,7 @@
 import datetime
+from importlib_resources import files, as_file
 import os
+
 from ipywidgets import Layout
 import ipyleaflet
 import numpy as np
@@ -15,6 +17,8 @@ try:
     from ipyleaflet_gl_vector_layer import IpyleafletGlVectorLayer, IpyleafletGlVectorLayerWrapper
 except ImportError:
     pass
+
+import avl
 
 panel.extension('vtk')
 panel.extension('plotly')
@@ -352,10 +356,12 @@ class MapPlot3D:
         sphere.SetThetaResolution(60)
 
         jpgreader = vtk.vtkJPEGReader()
-        jpgreader.SetFileName('8k_earth_daymap.jpg')
-        texture = vtk.vtkTexture()
-        texture.SetInputConnection(jpgreader.GetOutputPort())
-        texture.Update()
+        source = files(avl).joinpath('8k_earth_daymap.jpg')
+        with as_file(source) as jpgpath:
+            jpgreader.SetFileName(jpgpath)
+            texture = vtk.vtkTexture()
+            texture.SetInputConnection(jpgreader.GetOutputPort())
+            texture.Update()
 
         transformTexture = vtk.vtkTransformTextureCoords()
         transformTexture.SetInputConnection(sphere.GetOutputPort());
