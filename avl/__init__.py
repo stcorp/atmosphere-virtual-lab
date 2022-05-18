@@ -533,8 +533,8 @@ def Histogram(product, value, **kwargs):
     return vis.Histogram(**data, **kwargs)
 
 
-def scatter_data(product, value, **kwargs):
-    return _plot_data(product, value)
+def scatter_data(product, value, average=False, **kwargs):
+    return _plot_data(product, value, average=average)
 
 
 def Scatter(product, value, **kwargs):
