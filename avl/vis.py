@@ -94,7 +94,7 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 640), **kwargs):
+    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 400), **kwargs):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
