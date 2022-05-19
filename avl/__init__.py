@@ -294,6 +294,7 @@ def _plot_data(product, value=None, average=False):
     if average:
         xerror = np.nanstd(xdata, 0)
         xdata = np.nanmean(xdata, 0)
+        xlabel = xunit
 
     if value + '_uncertainty' in list(product):
         yerror = product[value + '_uncertainty'].data
