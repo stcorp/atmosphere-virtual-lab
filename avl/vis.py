@@ -2,6 +2,7 @@ import datetime
 from importlib_resources import files, as_file
 import os
 
+from IPython.display import display
 from ipywidgets import Layout
 import ipyleaflet
 import numpy as np
@@ -85,9 +86,8 @@ class Plot:  # TODO
             self._fig.add_trace(trace)
             self._traces.append(trace)
 
-    def _repr_mimebundle_(self, *args, **kwargs):
-        plot = panel.pane.Plotly(self._fig)
-        return plot._repr_mimebundle_(*args, **kwargs)
+    def _ipython_display_(self):
+        display(panel.pane.Plotly(self._fig))
 
 
 class MapPlot:
@@ -150,9 +150,8 @@ class MapPlot:
         self._map.add_layer(featureGlWrapper)
         featureGlWrapper.add_layer(featureGlLayer)
 
-    def _repr_mimebundle_(self, *args, **kwargs):
-        plot = panel.pane.ipywidget.IPyLeaflet(self._map)
-        return plot._repr_mimebundle_(*args, **kwargs)
+    def _ipython_display_(self):
+        display(panel.pane.ipywidget.IPyLeaflet(self._map))
 
 
 class MapPlot3D:
@@ -404,9 +403,8 @@ class MapPlot3D:
         self._renderwindow = vtk.vtkRenderWindow()
         self._renderwindow.AddRenderer(self._renderer)
 
-    def _repr_mimebundle_(self, *args, **kwargs):
-        plot = panel.pane.VTK(self._renderwindow, width=self.size[0], height=self.size[1])
-        return plot._repr_mimebundle_(*args, **kwargs)
+    def _ipython_display_(self):
+        display(panel.pane.VTK(self._renderwindow, width=self.size[0], height=self.size[1]))
 
 
 def VolumePlot(data=None, size=(640, 1000), scale=(1,1,1), display_slices=True, display_volume=True, **kwargs): # TODO add trace? specify physical north..?
