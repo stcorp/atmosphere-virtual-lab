@@ -21,11 +21,7 @@ except ImportError:
 
 import avl
 
-panel.extension('vtk')
-panel.extension('plotly')
-panel.extension(sizing_mode="stretch_width")
-
-# TODO check all visan args
+panel.extension('plotly', 'vtk', sizing_mode='stretch_width')
 
 _kPointData = 0
 _kSwathData = 1
