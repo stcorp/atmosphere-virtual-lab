@@ -94,7 +94,8 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 400), **kwargs):
+    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1,
+                 pointsize=2, zoom=1, size=(800, 400), colormap=None, **kwargs):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
@@ -113,6 +114,7 @@ class MapPlot:
         self._opacity = opacity
         self._data_type = data_type
         self._colorrange = colorrange
+        self._colormap = colormap
 
     def add(self, obj):
         """Add data trace of the same plot type.
@@ -144,7 +146,8 @@ class MapPlot:
             "colorrange": list(self._colorrange) if self._colorrange else None,
             "plot_type": plot_type,
             "pointsize": self._pointsize,
-            "opacity": self._opacity
+            "opacity": self._opacity,
+            "colormap": self._colormap
         }
         featureGlLayer = IpyleafletGlVectorLayer(**args)
         self._map.add_layer(featureGlWrapper)
