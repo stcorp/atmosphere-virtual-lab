@@ -6,7 +6,7 @@ from IPython.display import display
 from ipywidgets import Layout
 import ipyleaflet
 import numpy as np
-import panel
+import panel as pn
 import plotly.graph_objects as go
 import pyproj
 import vtk
@@ -21,7 +21,10 @@ except ImportError:
 
 import avl
 
-panel.extension('plotly', 'vtk', sizing_mode='stretch_width')
+# register extensions to be loaded when calling pn.extension
+# TODO under discussion with panel developer about correct approach for panel wrapper lib
+import panel.models.plotly
+import panel.models.vtk
 
 _kPointData = 0
 _kSwathData = 1
@@ -83,7 +86,8 @@ class Plot:  # TODO
             self._traces.append(trace)
 
     def _ipython_display_(self):
-        display(panel.pane.Plotly(self._fig))
+        pn.extension(sizing_mode='stretch_width')
+        display(pn.pane.Plotly(self._fig))
 
 
 class MapPlot:
@@ -147,7 +151,8 @@ class MapPlot:
         featureGlWrapper.add_layer(featureGlLayer)
 
     def _ipython_display_(self):
-        display(panel.pane.ipywidget.IPyLeaflet(self._map))
+        pn.extension(sizing_mode='stretch_width')
+        display(pn.pane.ipywidget.IPyLeaflet(self._map))
 
 
 class MapPlot3D:
@@ -400,12 +405,14 @@ class MapPlot3D:
         self._renderwindow.AddRenderer(self._renderer)
 
     def _ipython_display_(self):
-        display(panel.pane.VTK(self._renderwindow, width=self.size[0], height=self.size[1]))
+        pn.extension(sizing_mode='stretch_width')
+        display(pn.pane.VTK(self._renderwindow, width=self.size[0], height=self.size[1]))
 
 
 def VolumePlot(data=None, size=(640, 1000), scale=(1,1,1), display_slices=True, display_volume=True, **kwargs): # TODO add trace? specify physical north..?
-    plot = panel.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale)
-    plot = panel.Row(plot.controls(jslink=True), plot)
+    pn.extension(sizing_mode='stretch_width')
+    plot = pn.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale)
+    plot = pn.Row(plot.controls(jslink=True), plot)
     return plot
 
 
