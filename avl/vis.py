@@ -348,8 +348,27 @@ class MapPlot3D:
         lut.SetNumberOfTableValues(256)  # TODO configurable
 
         # colormap
-        if self.colormap is not None:
-            cmap = matplotlib.cm.get_cmap(self.colormap)
+        colormap = self.colormap if self.colormap is not None else 'viridis'
+
+        if isinstance(colormap, list):  # TODO interpolation mode as in visan? (sqrt, scurve).. use vtk SetRampTo*?
+            # TODO check again, as vtk should have all this builtin..
+            for i in range(256):
+                x = i*(1./255)
+                for idx in range(len(colormap)):
+                    x1, r1, g1, b1, a1 = colormap[idx]
+                    x2, r2, g2, b2, a2 = colormap[idx+1]
+                    if x1 <= x <= x2:
+                        weight = (x-x1)/(x2-x1)
+
+                        r = (1-weight)*r1 + weight*r2
+                        g = (1-weight)*g1 + weight*g2
+                        b = (1-weight)*b1 + weight*b2
+                        a = (1-weight)*a1 + weight*a2
+
+                        lut.SetTableValue(i, r, g, b, a)
+                        break
+        else:
+            cmap = matplotlib.cm.get_cmap(colormap)
             for i in range(256):
                 lut.SetTableValue(i, *cmap.colors[i])
 
@@ -563,11 +582,8 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
     data = np.array(xdata_new)
     xcoords = xcoords_new
 
-    if colormap is not None:
-        cmap = matplotlib.cm.get_cmap(colormap)
-        colorscale = [[i*1./255, 'rgb'+str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
-    else:
-        colorscale = 'Viridis'
+    cmap = matplotlib.cm.get_cmap(colormap or 'viridis')
+    colorscale = [[i*1./255, 'rgb'+str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
 
     fig.add(Trace(go.Heatmap(
         z=np.transpose(data),
