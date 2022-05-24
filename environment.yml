@@ -2,13 +2,15 @@ name: avl
 channels:
   - conda-forge
 dependencies:
-  - python=3.9
+  - python>=3.7
   - coda
-  - ipyleaflet=0.15.0
+  - ipyleaflet>=0.13.5
+  - ipyleaflet-gl-vector-layer-plugin
+  - matplotlib
   - harp
   - panel
   - pyproj
-  - vtk
+  - vtk>=9.1
   - plotly
   - numpy
   - scipy

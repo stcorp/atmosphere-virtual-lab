@@ -5,6 +5,7 @@ import os
 from IPython.display import display
 from ipywidgets import Layout
 import ipyleaflet
+import matplotlib  # TODO access colormaps differently? use separate project?
 import numpy as np
 import panel as pn
 import plotly.graph_objects as go
@@ -12,7 +13,7 @@ import pyproj
 import vtk
 import io
 from vtk.numpy_interface.dataset_adapter import numpyTovtkDataArray
-import vtk.util.numpy_support # TODO use newer numpy_interface?
+import vtk.util.numpy_support  # TODO use newer numpy_interface?
 
 try:
     from ipyleaflet_gl_vector_layer import IpyleafletGlVectorLayer, IpyleafletGlVectorLayerWrapper
@@ -100,7 +101,8 @@ class MapPlot:
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
-        colorrange: Color range to use (default min, max of data)
+        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values
+        colorrange -- Color range to use (default min, max of data)
         opacity -- Opacity (default 0.6)
         pointsize -- Point size
         size -- Plot size in pixels (default (640, 480))
@@ -162,12 +164,13 @@ class MapPlot3D:
     """3D Map Plot type
     """
     def __init__(self, showcolorbar=True, colorrange=None, size=(640, 480),
-              centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, # TODO opacity, pointsize.. per trace or global defaults?
-              zoom=None, **kwargs):
+              centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, # TODO opacity, pointsize, colormap.. per trace or global defaults?
+              zoom=None, colormap=None, **kwargs):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
+        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values
         colorrange -- Color range to use (default min, max of data)
         heightfactor -- Scale height
         opacity -- Opacity (default 0.6)
@@ -182,6 +185,7 @@ class MapPlot3D:
         self.size = size
         self.centerlon = centerlon
         self.centerlat = centerlat
+        self.colormap = colormap
         self.opacity = opacity
         self.heightfactor = heightfactor
         self.pointsize = pointsize
@@ -341,13 +345,23 @@ class MapPlot3D:
 
     def lookup_table(self, data):
         lut = vtk.vtkLookupTable()
-        lut.SetNumberOfTableValues(100)
+        lut.SetNumberOfTableValues(256)  # TODO configurable
+
+        # colormap
+        if self.colormap is not None:
+            cmap = matplotlib.cm.get_cmap(self.colormap)
+            for i in range(256):
+                lut.SetTableValue(i, *cmap.colors[i])
+
+        # NaN color
         lut.SetNanColor(0.0, 0.0, 0.0, 0.0)
 
+        # data range
         if self.colorrange is not None:
             lut.SetTableRange(self.colorrange[0], self.colorrange[1])
         else:
             lut.SetTableRange(np.nanmin(data), np.nanmax(data))
+
         lut.Build()
         return lut
 
@@ -508,7 +522,7 @@ def Histogram(data=None, bins=None, **kwargs):
 
 
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
-        colorlabel=None, gap_threshold=None, **kwargs):
+        colorlabel=None, gap_threshold=None, colormap=None, **kwargs):
     xcoords, ycoords = coords
 
     layout = {
@@ -549,12 +563,18 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
     data = np.array(xdata_new)
     xcoords = xcoords_new
 
+    if colormap is not None:
+        cmap = matplotlib.cm.get_cmap(colormap)
+        colorscale = [[i*1./255, 'rgb'+str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
+    else:
+        colorscale = 'Viridis'
+
     fig.add(Trace(go.Heatmap(
         z=np.transpose(data),
         x=xcoords,
         y=ycoords,
-        colorscale = 'Viridis',
-        colorbar = {'title': colorlabel},
+        colorscale=colorscale,
+        colorbar={'title': colorlabel},
     )))
 
     return fig
