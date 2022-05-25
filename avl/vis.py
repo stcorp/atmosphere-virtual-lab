@@ -262,7 +262,14 @@ class MapPlot3D:
             # data points
             lon_offset = (longitude[1] - longitude[0]) / 2
             lat_offset = (latitude[1] - latitude[0]) / 2
-            latitude_plus = np.append(latitude - lat_offset, latitude[-1] + lat_offset)
+
+            # crossing latitude boundaries (<90 or >90)
+            latitude_plus = np.append(latitude - lat_offset, latitude[-1]+lat_offset)
+            if latitude_plus[0] < -90:
+                latitude_plus[0] = -180 - latitude_plus[0]
+            if latitude_plus[-1] > 90:
+                latitude_plus[-1] = 180 - latitude_plus[-1]
+
             longitude_plus = np.append(longitude - lon_offset, longitude[-1] + lon_offset)
             longrid, latgrid = np.meshgrid(longitude_plus, latitude_plus)
 

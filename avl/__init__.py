@@ -425,10 +425,10 @@ def _mapplot_data(product, value=None, locationOnly=False):
 
     if value is not None:
         data = product[value].data
-        prop["name"] = value
-        prop["colorbartitle"] = value.replace('_', ' ')
+        prop['name'] = value
+        prop['colorbartitle'] = value.replace('_', ' ')
         try:
-            prop["colorbartitle"] += " [" + product[value].unit + "]"
+            prop['colorbartitle'] += ' [' + product[value].unit + ']'
         except AttributeError:
             pass
 
@@ -436,7 +436,7 @@ def _mapplot_data(product, value=None, locationOnly=False):
         'data': data,
         'longitude': longitude.data,
         'latitude': latitude.data,
-        "data_type": data_type,
+        'data_type': data_type,
     })
 
 
