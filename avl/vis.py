@@ -455,7 +455,8 @@ class MapPlot3D:
 
 def VolumePlot(data=None, size=(640, 1000), scale=(1,1,1), display_slices=True, display_volume=True, **kwargs): # TODO add trace? specify physical north..?
     pn.extension(sizing_mode='stretch_width')
-    plot = pn.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale)
+    data = np.nan_to_num(data, np.nanmin(data))  # TODO why needed, or configurable+default?
+    plot = pn.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale, nan_opacity=0.5)
     plot = pn.Row(plot.controls(jslink=True), plot)
     return plot
 
