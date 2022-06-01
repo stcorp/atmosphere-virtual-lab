@@ -101,7 +101,7 @@ class MapPlot:
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
-        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values
+        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
         colorrange -- Color range to use (default min, max of data)
         opacity -- Opacity (default 0.6)
         pointsize -- Point size
@@ -170,7 +170,7 @@ class MapPlot3D:
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
-        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values
+        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
         colorrange -- Color range to use (default min, max of data)
         heightfactor -- Scale height
         opacity -- Opacity (default 0.6)
@@ -455,7 +455,7 @@ class MapPlot3D:
 
 def VolumePlot(data=None, size=(640, 1000), scale=(1,1,1), display_slices=True, display_volume=True, **kwargs): # TODO add trace? specify physical north..?
     pn.extension(sizing_mode='stretch_width')
-    data = np.nan_to_num(data, np.nanmin(data))  # TODO why needed, or configurable+default?
+    data = np.nan_to_num(data, np.nanmin(data))  # known issue in vtk.js that it doesn't handle nans
     plot = pn.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale, nan_opacity=0.5)
     plot = pn.Row(plot.controls(jslink=True), plot)
     return plot

@@ -481,7 +481,6 @@ def volume_data(product, value, spherical=False, **kwargs):
 
         grid_x, grid_y, grid_z = np.mgrid[-1e7:1e7:100j, -1e7:1e7:100j, -1e7:1e7:100j]
         data = griddata(points, values, (grid_x, grid_y, grid_z), method='nearest')
-        data = np.nan_to_num(data, 0.0)
 
     return _objdict(**{
         'data': data,
@@ -492,7 +491,9 @@ def Volume(product, value, **kwargs):
     """
     Return a Volume data trace for the given Harp variable.
 
-    Volume data traces cannot currently be combined in a single plot.
+    Nan-values are converted to the lowest non-nan value.
+
+    Volume data traces cannot currently be combined in a single plot!
 
     Arguments:
     product -- Harp product
@@ -571,7 +572,7 @@ def Heatmap(product, value, **kwargs):
     Arguments:
     product -- Harp product
     value -- Harp variable name
-    colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values
+    colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
     gap_threshold -- Add gaps when larger (np.timedelta, default 24h)
 
     """
