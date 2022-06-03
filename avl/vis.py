@@ -110,7 +110,6 @@ class MapPlot:
 
         """
         self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom, scroll_wheel_zoom=True, layout=Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px'))
-        self._traces = []
         self._data = []
         self._pointsize = pointsize
         self._opacity = opacity
@@ -125,14 +124,11 @@ class MapPlot:
         obj -- Data trace
         """
         if isinstance(obj, MapPlot):
-            traces = obj._traces
             data = obj._data
             latitude, longitude, data, kwargs = data[0]
-            self._traces.append(traces[0])
             self._data.append(data[0])
         elif isinstance(obj, Trace):
             latitude, longitude, data, kwargs = obj.data
-            self._traces.append(obj)
             self._data.append(obj.data)
         else:
             latitude, longitude, data, kwargs = obj
@@ -195,7 +191,6 @@ class MapPlot3D:
         self.p1 = pyproj.Proj(proj='longlat', a=6.1e9, b=6.1e9)
         self.p2 = pyproj.Proj(proj='geocent', a=6.1e9, b=6.1e9)
 
-        self._traces = []
         self._data = []
 
         self._renderwindow = None
@@ -208,14 +203,11 @@ class MapPlot3D:
         obj -- Data trace
         """
         if isinstance(obj, MapPlot3D):  # TODO plot with multiple traces
-            traces = obj._traces
             data = obj._data
             latitude, longitude, data, kwargs = data[0]
-            self._traces.append(traces[0])
             self._data.append(data[0])
         elif isinstance(obj, Trace):
             latitude, longitude, data, kwargs = obj.data
-            self._traces.append(obj)
             self._data.append(obj.data)
         else:
             latitude, longitude, data, kwargs = obj
