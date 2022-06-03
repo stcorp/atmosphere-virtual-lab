@@ -42,7 +42,8 @@ Combining data traces:
     plot.add(avl.Geo(product, 'var2'))
     plot
 
-<a name="avl.download"></a>
+<a id="avl.download"></a>
+
 #### download
 
 ```python
@@ -57,7 +58,8 @@ that already exist.
 - `files` - file name or list/tuple of file names
 - `target_directory` - path where to store files (default '.')
 
-<a name="avl.Volume"></a>
+<a id="avl.Volume"></a>
+
 #### Volume
 
 ```python
@@ -66,7 +68,9 @@ Volume(product, value, **kwargs)
 
 Return a Volume data trace for the given Harp variable.
 
-Volume data traces cannot currently be combined in a single plot.
+Nan-values are converted to the lowest non-nan value.
+
+Volume data traces cannot currently be combined in a single plot!
 
 **Arguments**:
 
@@ -74,7 +78,8 @@ Volume data traces cannot currently be combined in a single plot.
 - `value` - Harp variable name
 - `spherical` - Project data to a sphere (default False)
 
-<a name="avl.Histogram"></a>
+<a id="avl.Histogram"></a>
+
 #### Histogram
 
 ```python
@@ -91,7 +96,8 @@ Compatible plot type: `Plot`
 - `value` - Harp variable name
 - `bins` - Number of bins
 
-<a name="avl.Scatter"></a>
+<a id="avl.Scatter"></a>
+
 #### Scatter
 
 ```python
@@ -107,7 +113,8 @@ Compatible plot type: `Plot`
 - `product` - Harp product
 - `value` - Harp variable name
 
-<a name="avl.Heatmap"></a>
+<a id="avl.Heatmap"></a>
+
 #### Heatmap
 
 ```python
@@ -122,9 +129,11 @@ Compatible plot type: `Plot`
 
 - `product` - Harp product
 - `value` - Harp variable name
+- `colormap` - Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
 - `gap_threshold` - Add gaps when larger (np.timedelta, default 24h)
 
-<a name="avl.Geo"></a>
+<a id="avl.Geo"></a>
+
 #### Geo
 
 ```python
@@ -140,7 +149,8 @@ Compatible plot type: `MapPlot`
 - `product` - Harp product
 - `value` - Harp variable name
 
-<a name="avl.Geo3D"></a>
+<a id="avl.Geo3D"></a>
+
 #### Geo3D
 
 ```python
@@ -156,10 +166,12 @@ Compatible plot type: `MapPlot3D`
 - `product` - Harp product
 - `value` - Harp variable name
 
-<a name="avl.vis"></a>
+<a id="avl.vis"></a>
+
 # avl.vis
 
-<a name="avl.vis.Plot"></a>
+<a id="avl.vis.Plot"></a>
+
 ## Plot Objects
 
 ```python
@@ -168,7 +180,8 @@ class Plot()
 
 2D Plot type
 
-<a name="avl.vis.Plot.add"></a>
+<a id="avl.vis.Plot.add"></a>
+
 #### add
 
 ```python
@@ -181,7 +194,8 @@ Add data trace of the same plot type.
 
 - `obj` - Data trace
 
-<a name="avl.vis.MapPlot"></a>
+<a id="avl.vis.MapPlot"></a>
+
 ## MapPlot Objects
 
 ```python
@@ -190,24 +204,27 @@ class MapPlot()
 
 2D Map Plot type
 
-<a name="avl.vis.MapPlot.__init__"></a>
+<a id="avl.vis.MapPlot.__init__"></a>
+
 #### \_\_init\_\_
 
 ```python
-__init__(**kwargs)
+__init__(data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 400), colormap=None, **kwargs)
 ```
 
 **Arguments**:
 
-- `colorrange` - Color range to use (default min, max of data)
-- `size` - Plot size in pixels (default (640, 480))
 - `centerlon` - Center longitude (default 0)
 - `centerlat` - Center latitude (default 0)
+- `colormap` - Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+- `colorrange` - Color range to use (default min, max of data)
 - `opacity` - Opacity (default 0.6)
 - `pointsize` - Point size
+- `size` - Plot size in pixels (default (640, 480))
 - `zoom` - Zoom factor
 
-<a name="avl.vis.MapPlot.add"></a>
+<a id="avl.vis.MapPlot.add"></a>
+
 #### add
 
 ```python
@@ -220,7 +237,8 @@ Add data trace of the same plot type.
 
 - `obj` - Data trace
 
-<a name="avl.vis.MapPlot3D"></a>
+<a id="avl.vis.MapPlot3D"></a>
+
 ## MapPlot3D Objects
 
 ```python
@@ -229,26 +247,29 @@ class MapPlot3D()
 
 3D Map Plot type
 
-<a name="avl.vis.MapPlot3D.__init__"></a>
+<a id="avl.vis.MapPlot3D.__init__"></a>
+
 #### \_\_init\_\_
 
 ```python
-__init__(showcolorbar=True, colorrange=None, size=(640, 480), centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, zoom=None, **kwargs)
+__init__(showcolorbar=True, colorrange=None, size=(640, 480), centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, zoom=None, colormap=None, **kwargs)
 ```
 
 **Arguments**:
 
-- `showcolorbar` - Show colorbar (default True)
-- `colorrange` - Color range to use (default min, max of data)
-- `size` - Plot size in pixels (default (640, 480))
 - `centerlon` - Center longitude (default 0)
 - `centerlat` - Center latitude (default 0)
+- `colormap` - Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+- `colorrange` - Color range to use (default min, max of data)
+- `heightfactor` - Scale height
 - `opacity` - Opacity (default 0.6)
 - `pointsize` - Point size
-- `heightfactor` - Scale height
+- `showcolorbar` - Show colorbar (default True)
+- `size` - Plot size in pixels (default (640, 480))
 - `zoom` - Zoom factor
 
-<a name="avl.vis.MapPlot3D.add"></a>
+<a id="avl.vis.MapPlot3D.add"></a>
+
 #### add
 
 ```python
