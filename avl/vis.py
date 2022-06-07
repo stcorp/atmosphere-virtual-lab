@@ -117,6 +117,9 @@ class MapPlot:
         self._colorrange = colorrange
         self._colormap = colormap
 
+    def getMap(self):
+        return self._map
+
     def add(self, obj):
         """Add data trace of the same plot type.
 
@@ -462,7 +465,7 @@ class Trace:
 def Geo(latitude, longitude, data=None, **kwargs):
     mapplot = MapPlot(**kwargs)
     mapplot.add(Trace(None, (latitude, longitude, data, kwargs)))
-    return mapplot
+    return mapplot.getMap()
 
 
 def Geo3D(latitude, longitude, data=None, **kwargs):
