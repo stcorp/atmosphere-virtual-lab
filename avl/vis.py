@@ -61,7 +61,6 @@ class Plot:  # TODO
     def __init__(self, layout=None, **kwargs):  # TODO name individual kwargs
         self._fig = go.Figure()
         self._traces = []
-        self._data = []
         self._layout = layout
         if layout is not None:
             self._fig.update_layout(layout)
@@ -74,16 +73,21 @@ class Plot:  # TODO
         """
         if isinstance(obj, Plot):
             traces = obj._traces
-            data = obj._data
             if self._layout is None:
                 self._layout = obj._layout
                 self._fig.update_layout(obj._layout)
+        elif isinstance(obj, Trace):
+            traces = [obj]
         else:
-            traces, data = [obj.trace], [obj.data]
+            assert False
 
-        for trace, data in zip(traces, data):
-            self._data.append(data)
-            self._fig.add_trace(trace)
+        for trace in traces:
+            if trace.type_ == 'scatter':
+                self._fig.add_trace(go.Scatter(**trace.kwargs))
+            elif trace.type_ == 'heatmap':
+                self._fig.add_trace(go.Heatmap(**trace.kwargs))
+            elif trace.type_ == 'histogram':
+                self._fig.add_trace(go.Histogram(**trace.kwargs))
             self._traces.append(trace)
 
     def _ipython_display_(self):
@@ -110,10 +114,10 @@ class MapPlot:
 
         """
         self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom, scroll_wheel_zoom=True, layout=Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px'))
-        self._data = []
+        self._traces = []
         self._pointsize = pointsize
         self._opacity = opacity
-        self._data_type = data_type
+        self._data_type = data_type  # TODO use _data_type instead!
         self._colorrange = colorrange
         self._colormap = colormap
 
@@ -127,32 +131,36 @@ class MapPlot:
         obj -- Data trace
         """
         if isinstance(obj, MapPlot):
-            data = obj._data
-            latitude, longitude, data, kwargs = data[0]
-            self._data.append(data[0])
+            traces = obj._traces
         elif isinstance(obj, Trace):
-            latitude, longitude, data, kwargs = obj.data
-            self._data.append(obj.data)
+            traces = [obj]
         else:
-            latitude, longitude, data, kwargs = obj
-        plot_types = dict([(0, 'points'), (1, 'swath'), (2, 'grid')])
-        plot_type = None
-        if(self._data_type is not None):
-            plot_type = plot_types[self._data_type]
-        featureGlWrapper = IpyleafletGlVectorLayerWrapper()
-        args = {
-            "lat": latitude,
-            "lon": longitude,
-            "data": data,
-            "colorrange": list(self._colorrange) if self._colorrange else None,
-            "plot_type": plot_type,
-            "pointsize": self._pointsize,
-            "opacity": self._opacity,
-            "colormap": self._colormap
-        }
-        featureGlLayer = IpyleafletGlVectorLayer(**args)
-        self._map.add_layer(featureGlWrapper)
-        featureGlWrapper.add_layer(featureGlLayer)
+            assert False
+
+        for trace in traces:
+            kwargs = trace.kwargs
+
+            plot_types = dict([(0, 'points'), (1, 'swath'), (2, 'grid')])
+            plot_type = None
+            if(self._data_type is not None):
+                plot_type = plot_types[self._data_type]
+
+            featureGlWrapper = IpyleafletGlVectorLayerWrapper()
+            args = {
+                "lat": kwargs['latitude'],
+                "lon": kwargs['longitude'],
+                "data": kwargs['data'],
+                "colorrange": list(self._colorrange) if self._colorrange else None,
+                "plot_type": plot_type,
+                "pointsize": self._pointsize,
+                "opacity": self._opacity,
+                "colormap": self._colormap
+            }
+            featureGlLayer = IpyleafletGlVectorLayer(**args)
+            self._map.add_layer(featureGlWrapper)
+            featureGlWrapper.add_layer(featureGlLayer)
+
+            self._traces.append(trace)
 
     def _ipython_display_(self):
         pn.extension(sizing_mode='stretch_width')
@@ -194,7 +202,7 @@ class MapPlot3D:
         self.p1 = pyproj.Proj(proj='longlat', a=6.1e9, b=6.1e9)
         self.p2 = pyproj.Proj(proj='geocent', a=6.1e9, b=6.1e9)
 
-        self._data = []
+        self._traces = []
 
         self._renderwindow = None
         self._renderer = None
@@ -205,29 +213,29 @@ class MapPlot3D:
         Arguments:
         obj -- Data trace
         """
-        if isinstance(obj, MapPlot3D):  # TODO plot with multiple traces
-            data = obj._data
-            latitude, longitude, data, kwargs = data[0]
-            self._data.append(data[0])
+        if isinstance(obj, MapPlot3D):
+            traces = obj._traces
         elif isinstance(obj, Trace):
-            latitude, longitude, data, kwargs = obj.data
-            self._data.append(obj.data)
+            traces = [obj]
         else:
-            latitude, longitude, data, kwargs = obj
+            assert False
 
         self.setup_scene()
 
-        lut = self.lookup_table(data)
+        for trace in traces:
+            kwargs = trace.kwargs
 
-        sphere_actor = self.sphere_actor()
-        data_actor = self.data_actor(latitude, longitude, data, lut, kwargs.get('heightfactor'))
-        colorbar_actor = self.colorbar_actor(lut)
+            lut = self.lookup_table(kwargs['data'])
 
-        self._renderer.AddActor(sphere_actor)
-        self._renderer.AddActor(data_actor)
+            data_actor = self.data_actor(kwargs['latitude'], kwargs['longitude'], kwargs['data'], lut, kwargs.get('heightfactor'))
+            colorbar_actor = self.colorbar_actor(lut)
 
-        if self.showcolorbar:
-            self._renderer.AddActor(colorbar_actor)
+            self._renderer.AddActor(data_actor)
+
+            if self.showcolorbar:
+                self._renderer.AddActor(colorbar_actor)
+
+            self._traces.append(trace)
 
 
     def data_actor(self, latitude, longitude, data, lut, heightfactor):
@@ -425,8 +433,6 @@ class MapPlot3D:
         if self._renderwindow is not None:
             return self._renderer
 
-        # TODO visan uses vtkInteractorStyle with all sorts of overrides
-
         # camera
         camera = vtk.vtkCamera()
         dist = 3e10 - (self.zoom or 0) * 2e9  # TODO incorrect/different
@@ -438,6 +444,10 @@ class MapPlot3D:
         # renderer
         self._renderer = vtk.vtkRenderer()
         self._renderer.SetActiveCamera(camera)
+
+        # sphere
+        sphere_actor = self.sphere_actor()
+        self._renderer.AddActor(sphere_actor)
 
         # renderwindow
         self._renderwindow = vtk.vtkRenderWindow()
@@ -457,20 +467,32 @@ def VolumePlot(data=None, size=(640, 1000), scale=(1,1,1), display_slices=True, 
 
 
 class Trace:
-    def __init__(self, trace, data=None):
-        self.trace = trace
-        self.data = data
+    def __init__(self, type_, **kwargs):
+        self.type_ = type_
+        self.kwargs = kwargs
 
 
 def Geo(latitude, longitude, data=None, **kwargs):
     mapplot = MapPlot(**kwargs)
-    mapplot.add(Trace(None, (latitude, longitude, data, kwargs)))
+    mapplot.add(Trace(
+        'geo',
+        latitude=latitude,
+        longitude=longitude,
+        data=data,
+        **kwargs
+    ))
     return mapplot.getMap()
 
 
 def Geo3D(latitude, longitude, data=None, **kwargs):
     mapplot3d = MapPlot3D(**kwargs)
-    mapplot3d.add(Trace(None, (latitude, longitude, data, kwargs)))
+    mapplot3d.add(Trace(
+        'geo3d',
+        latitude=latitude,
+        longitude=longitude,
+        data=data,
+        **kwargs
+    ))
     return mapplot3d
 
 
@@ -498,29 +520,32 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None, points
         error_y = None
         mode = None
 
-    fig.add(Trace(go.Scatter(
+    fig.add(Trace(
+        'scatter',
         x=xdata,
         y=ydata,
         error_y=error_y,
         mode=mode,
         showlegend=False,
-    )))
+    ))
 
     if xerror is not None:  # TODO y
-        fig.add(Trace(go.Scatter(
+        fig.add(Trace(
+            'scatter',
             x=xdata-xerror,
             y=ydata,
             line={'width': 0},
             showlegend=False,
-        )))
-        fig.add(Trace(go.Scatter(
+        ))
+        fig.add(Trace(
+            'scatter',
             x=xdata+xerror,
             y=ydata,
             fill='tonexty',
             line={'width': 0},
             fillcolor='rgba(68, 68, 68, 0.3)',
             showlegend=False,
-        )))
+        ))
 
     return fig
 
@@ -534,12 +559,13 @@ def Histogram(data=None, bins=None, **kwargs):
 
     fig = Plot(layout)
 
-    fig.add(Trace(go.Histogram(
-                    x = data,
-                    nbinsx = bins*2 if bins else None,  # TODO why *2 needed
-                    name = kwargs['title'],
-                    opacity = 0.8,
-                ), kwargs))
+    fig.add(Trace(
+        'histogram',
+        x = data,
+        nbinsx = bins*2 if bins else None,  # TODO why *2 needed
+        name = kwargs['title'],
+        opacity = 0.8
+    ))
 
     return fig
 
@@ -592,12 +618,13 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
         cmap = matplotlib.cm.get_cmap(colormap or 'viridis')
         colorscale = [[i*1./255, 'rgb'+str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
 
-    fig.add(Trace(go.Heatmap(
+    fig.add(Trace(
+        'heatmap',
         z=np.transpose(data),
         x=xcoords,
         y=ycoords,
         colorscale=colorscale,
         colorbar={'title': colorlabel},
-    )))
+    ))
 
     return fig
