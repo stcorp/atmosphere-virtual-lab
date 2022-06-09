@@ -446,7 +446,7 @@ def volume_data(product, value, spherical=False, **kwargs):
 
     data = product[value].data
 
-    if spherical:
+    if spherical: # TODO add earth somehow
         source_crs = pyproj.CRS('epsg:4326')
         target_crs = pyproj.crs.GeocentricCRS('epsg:6326')
 
@@ -455,11 +455,21 @@ def volume_data(product, value, spherical=False, **kwargs):
         points = []
         values = []
 
-        for ilon in np.arange(0,240): # TODO all specific to example.. inspect harp product!
-            for ilat in np.arange(0,180):
-                for ialt in np.arange(30):
-                    value = data[ialt][ilat][ilon]
-                    point = list(trans.itransform([[ilat-90, ilon, ialt*1e5]]))[0]
+        lons = product.longitude.data
+        lats = product.latitude.data
+        alts = product.altitude.data
+
+        altmin = min(alts)
+        altmax = max(alts)
+
+        for ilon, lon in enumerate(lons):  # TODO assuming (lon,lat,alt) dimension (order)
+            for ilat, lat in enumerate(lats):
+                if ilon % 5 != 0 or ilat % 5 != 0:  # TODO autoscale? 1024x512 is too much for regrid..
+                    continue
+
+                for ialt, alt in enumerate(alts):
+                    value = data[ilat][ilon][ialt]
+                    point = list(trans.itransform([[lat, lon, ((alt-altmin)/(altmax-altmin))*3e6]]))[0]  # TODO auto scale
                     points.append(point)
                     values.append(value)
 
@@ -475,11 +485,11 @@ def volume_data(product, value, spherical=False, **kwargs):
         for ilon in np.arange(0,360):
             for ilat in np.arange(0,180):
                 value = np.nan
-                point = list(trans.itransform([[ilat-90, ilon, 31*1e5]]))[0]
+                point = list(trans.itransform([[ilat-90, ilon, 3.1e6]]))[0] # TODO
                 points.append(point)
                 values.append(value)
 
-        grid_x, grid_y, grid_z = np.mgrid[-1e7:1e7:100j, -1e7:1e7:100j, -1e7:1e7:100j]
+        grid_x, grid_y, grid_z = np.mgrid[-1e7:1e7:100j, -1e7:1e7:100j, -1e7:1e7:100j]  # TODO configurable
         data = griddata(points, values, (grid_x, grid_y, grid_z), method='nearest')
 
     return _objdict(**{
