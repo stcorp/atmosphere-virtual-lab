@@ -481,7 +481,7 @@ def Geo(latitude, longitude, data=None, **kwargs):
         data=data,
         **kwargs
     ))
-    return mapplot.getMap()
+    return mapplot
 
 
 def Geo3D(latitude, longitude, data=None, **kwargs):
