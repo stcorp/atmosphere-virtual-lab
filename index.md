@@ -11,6 +11,7 @@ to automatically produce an annotated data trace.
 The following types of data traces are currently supported:
 
 - Scatter
+- Line
 - Histogram
 - Heatmap
 - Geo
@@ -105,6 +106,23 @@ Scatter(product, value, **kwargs)
 ```
 
 Return a Scatter data trace for the given Harp variable.
+
+Compatible plot type: `Plot`
+
+**Arguments**:
+
+- `product` - Harp product
+- `value` - Harp variable name
+
+<a id="avl.Line"></a>
+
+#### Line
+
+```python
+Line(product, value, **kwargs)
+```
+
+Return a Line data trace for the given Harp variable.
 
 Compatible plot type: `Plot`
 
