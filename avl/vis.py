@@ -99,7 +99,7 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1,
+    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=0.6,
                  pointsize=2, zoom=1, size=(800, 400), colormap=None, **kwargs):
         """
         Arguments:
@@ -139,6 +139,7 @@ class MapPlot:
 
         for trace in traces:
             kwargs = trace.kwargs
+            opacity = kwargs.get('opacity')
 
             plot_types = dict([(0, 'points'), (1, 'swath'), (2, 'grid')])
             plot_type = None
@@ -153,7 +154,7 @@ class MapPlot:
                 "colorrange": list(self._colorrange) if self._colorrange else None,
                 "plot_type": plot_type,
                 "pointsize": self._pointsize,
-                "opacity": self._opacity,
+                "opacity": opacity if opacity is not None else self._opacity,
                 "colormap": self._colormap
             }
             featureGlLayer = IpyleafletGlVectorLayer(**args)
@@ -171,7 +172,7 @@ class MapPlot3D:
     """3D Map Plot type
     """
     def __init__(self, showcolorbar=True, colorrange=None, size=(640, 480),
-              centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, # TODO opacity, pointsize, colormap.. per trace or global defaults?
+              centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, # TODO pointsize, colormap, colorrange.. settable per-trace
               zoom=None, colormap=None, **kwargs):
         """
         Arguments:
@@ -227,7 +228,7 @@ class MapPlot3D:
 
             lut = self.lookup_table(kwargs['data'])
 
-            data_actor = self.data_actor(kwargs['latitude'], kwargs['longitude'], kwargs['data'], lut, kwargs.get('heightfactor'))
+            data_actor = self.data_actor(kwargs['latitude'], kwargs['longitude'], kwargs['data'], lut, kwargs.get('heightfactor'), kwargs.get('opacity'))
             colorbar_actor = self.colorbar_actor(lut)
 
             self._renderer.AddActor(data_actor)
@@ -238,7 +239,7 @@ class MapPlot3D:
             self._traces.append(trace)
 
 
-    def data_actor(self, latitude, longitude, data, lut, heightfactor):
+    def data_actor(self, latitude, longitude, data, lut, heightfactor, opacity):
         data_type = _data_type(latitude, longitude, data)
 
         # swath data: polygons for lat/lon boundaries
@@ -346,7 +347,7 @@ class MapPlot3D:
         mappert.SetLookupTable(lut)
 
         actor = vtk.vtkActor()
-        actor.GetProperty().SetOpacity(self.opacity)
+        actor.GetProperty().SetOpacity(opacity if opacity is not None else self.opacity)
         if self.pointsize is not None:
             actor.GetProperty().SetPointSize(self.pointsize)
         actor.SetMapper(mappert)
@@ -461,7 +462,7 @@ class MapPlot3D:
 def VolumePlot(data=None, size=(640, 1000), scale=(1,1,1), display_slices=True, display_volume=True, **kwargs): # TODO add trace? specify physical north..?
     pn.extension(sizing_mode='stretch_width')
     data = np.nan_to_num(data, np.nanmin(data))  # known issue in vtk.js that it doesn't handle nans
-    plot = pn.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale, nan_opacity=0.5)
+    plot = pn.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale)
     plot = pn.Row(plot.controls(jslink=True), plot)
     return plot
 
@@ -564,7 +565,7 @@ def Histogram(data=None, bins=None, **kwargs):
         x = data,
         nbinsx = bins*2 if bins else None,  # TODO why *2 needed
         name = kwargs['title'],
-        opacity = 0.8
+        opacity = 0.6
     ))
 
     return fig
