@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="atmosphere-virtual-lab",
-    version="0.1.9",
+    version="0.1.10",
     author="S[&]T",
     url="https://github.com/stcorp/atmosphere-virtual-lab",
     description="Top-level package for an Atmosphere Virtual Lab installation",
