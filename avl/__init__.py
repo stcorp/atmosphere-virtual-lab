@@ -493,6 +493,8 @@ def volume_data(product, value, spherical=False, **kwargs):
     })
 
 
+# TODO is 'value' the right name for a Harp variable?
+
 def Volume(product, value, **kwargs):
     """
     Return a Volume data trace for the given Harp variable.
