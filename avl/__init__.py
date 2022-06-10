@@ -44,6 +44,7 @@ to automatically produce an annotated data trace.
 The following types of data traces are currently supported:
 
 - Scatter
+- Line
 - Histogram
 - Heatmap
 - Geo
@@ -76,8 +77,6 @@ Combining data traces:
     plot
 
 """
-
-# TODO is 'value' the right name for a Harp variable?
 
 
 def download(files, target_directory="."):
@@ -557,8 +556,27 @@ def Scatter(product, value, **kwargs):
     value -- Harp variable name
 
     """
-    data = _plot_data(product, value)
+    data = scatter_data(product, value)
     return vis.Scatter(**data, **kwargs)
+
+
+def line_data(product, value, average=False, **kwargs):
+    return _plot_data(product, value, average=average)
+
+
+def Line(product, value, **kwargs):
+    """
+    Return a Line data trace for the given Harp variable.
+
+    Compatible plot type: `Plot`
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
+    data = line_data(product, value)
+    return vis.Line(**data, **kwargs)
 
 
 def heatmap_data(product, value, **kwargs):

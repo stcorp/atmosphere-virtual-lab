@@ -498,7 +498,7 @@ def Geo3D(latitude, longitude, data=None, **kwargs):
 
 
 def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None, pointsize=None,
-         xnumticks=None, ynumticks=None, xerror=None, yerror=None, **kwargs):
+         xnumticks=None, ynumticks=None, xerror=None, yerror=None, lines=False, **kwargs):
 
     layout = {
         'title': title,
@@ -519,7 +519,10 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None, points
         mode = 'markers'
     else:
         error_y = None
-        mode = None
+        if lines:
+            mode = None
+        else:
+            mode = 'markers'
 
     fig.add(Trace(
         'scatter',
@@ -549,6 +552,10 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None, points
         ))
 
     return fig
+
+
+def Line(*args, **kwargs):
+    return Scatter(*args, lines=True, **kwargs)
 
 
 def Histogram(data=None, bins=None, **kwargs):
