@@ -455,20 +455,17 @@ def volume_data(product, value, spherical=False, **kwargs):
         points = []
         values = []
 
-        lons = product.longitude.data
+        lons = product.longitude.data  # TODO what if we only have *_bounds? (eg after rebin)
         lats = product.latitude.data
         alts = product.altitude.data
 
         altmin = min(alts)
         altmax = max(alts)
 
-        for ilon, lon in enumerate(lons):  # TODO assuming (lon,lat,alt) dimension (order)
-            for ilat, lat in enumerate(lats):
-                if ilon % 5 != 0 or ilat % 5 != 0:  # TODO autoscale? 1024x512 is too much for regrid..
-                    continue
-
+        for ilat, lat in enumerate(lats):
+            for ilon, lon in enumerate(lons):
                 for ialt, alt in enumerate(alts):
-                    value = data[ilat][ilon][ialt]
+                    value = data[ilat][ilon][ialt]  # TODO assuming (lat,lon,alt) dimension (order)
                     point = list(trans.itransform([[lat, lon, ((alt-altmin)/(altmax-altmin))*3e6]]))[0]  # TODO auto scale
                     points.append(point)
                     values.append(value)
