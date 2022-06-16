@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import os
 import re
 
@@ -13,9 +13,12 @@ from . import vis
 
 from .vis import Plot, MapPlot, MapPlot3D
 
-
 _UNPREFERED_PATTERNS = [
-    "index", "collocation_index", "orbit_index", ".*subindex", "scan_direction_type",
+    "index",
+    "collocation_index",
+    "orbit_index",
+    ".*subindex",
+    "scan_direction_type",
     "datetime.*",
     "sensor_.*",
     ".*validity",
@@ -119,10 +122,10 @@ class _objdict(dict):
             raise AttributeError("No such attribute: " + name)
 
 
-def _get_prefered_value(values, unprefered_patterns):
+def _get_prefered_value(values, unprefered_patterns=_UNPREFERED_PATTERNS):
     if unprefered_patterns:
-        value = _get_prefered_value([value for value in values if not re.match(unprefered_patterns[0], value)],
-                                   unprefered_patterns[1:])
+        non_matching = [v for v in values if not re.match(unprefered_patterns[0], v)]
+        value = _get_prefered_value(non_matching, unprefered_patterns[1:])
         if value is not None:
             return value
     if values:
@@ -140,7 +143,9 @@ def _get_attributes(product):
                 if base in ["s", "seconds", "days"]:
                     if base == "days":
                         value *= 86400
-                    formats = "yyyy-MM-dd HH:mm:ss.SSSSSS|yyyy-MM-dd HH:mm:ss|yyyy-MM-dd"
+                    formats = ("yyyy-MM-dd HH:mm:ss.SSSSSS|"
+                               "yyyy-MM-dd HH:mm:ss|"
+                               "yyyy-MM-dd")
                     value = value + coda.time_string_to_double(formats, epoch)
                     return coda.time_to_string(value)
             return "%s [%s]" % (str(value), variable.unit)
@@ -150,18 +155,24 @@ def _get_attributes(product):
     for name in list(product):
         if len(product[name].dimension) == 0:
             attr[name] = attr_value(product[name].data, product[name])
-        elif len(product[name].dimension) == 1 and product[name].dimension[0] == 'time':
+        elif (len(product[name].dimension) == 1 and
+              product[name].dimension[0] == 'time'):
             attr[name] = [attr_value(value, product[name]) for value in product[name].data]
+
     return attr
 
 
 def _get_midpoint_axis_from_bounds(bounds_variable, log=False):
-    if bounds_variable.data.shape[-1] != 2 or bounds_variable.dimension[-1] is not None:
-        raise ValueError("bounds variable should end with independent dimension of length 2")
+    if (bounds_variable.data.shape[-1] != 2 or
+            bounds_variable.dimension[-1] is not None):
+        raise ValueError("bounds variable should end with independent"
+                         "dimension of length 2")
     if log:
-        data = np.exp((np.log(bounds_variable.data[..., 0]) + np.log(bounds_variable.data[..., 1])) / 2.0)
+        data = np.exp((np.log(bounds_variable.data[..., 0]) +
+                       np.log(bounds_variable.data[..., 1])) / 2.0)
     else:
-        data = (bounds_variable.data[..., 0] + bounds_variable.data[..., 1]) / 2.0
+        data = ((bounds_variable.data[..., 0] +
+                 bounds_variable.data[..., 1]) / 2.0)
     return harp.Variable(data, bounds_variable.dimension[:-1], bounds_variable.unit)
 
 
@@ -180,7 +191,8 @@ def _plot_data(product, value=None, average=False):
             continue
         if product[name].dimension[0] != 'time':
             continue
-        if len(product[name].dimension) == 2 and product[name].dimension[1] not in ['spectral', 'vertical']:
+        if (len(product[name].dimension) == 2 and
+                product[name].dimension[1] not in ['spectral', 'vertical']):
             continue
         variable_names += [name]
 
@@ -190,7 +202,7 @@ def _plot_data(product, value=None, average=False):
         if value not in variable_names:
             raise ValueError("product variable is not plottable ('%s')" % value)
     else:
-        value = _get_prefered_value(variable_names, _UNPREFERED_PATTERNS)
+        value = _get_prefered_value(variable_names)
 
     if value is None:
         raise ValueError("HARP product is not plotable")
@@ -208,7 +220,8 @@ def _plot_data(product, value=None, average=False):
             elif 'wavenumber' in product:
                 xdata = product['wavenumber']
             if xdata is None:
-                raise ValueError("Could not determine x-axis for spectral data ('%s')" % value)
+                raise ValueError("Could not determine x-axis for spectral"
+                                 " data ('%s')" % value)
         else:
             # product[value].dimension[1] == 'vertical'
             # swap axis
@@ -225,7 +238,8 @@ def _plot_data(product, value=None, average=False):
                 ydata = _get_midpoint_axis_from_bounds(product['pressure_bounds'], log=True)
                 prop["ylog"] = True
             if ydata is None:
-                raise ValueError("Could not determine y-axis for vertical profile data ('%s')" % value)
+                raise ValueError("Could not determine y-axis for vertical"
+                                 " profile data ('%s')" % value)
         attr = _get_attributes(product)
     else:
         if 'datetime' in product:
@@ -235,7 +249,8 @@ def _plot_data(product, value=None, average=False):
         elif 'datetime_stop' in product:
             xdata = product['datetime_stop']
         if xdata is None:
-            raise ValueError("Could not determine x-axis for time-series data ('%s')" % value)
+            raise ValueError("Could not determine x-axis for time-series"
+                             " data ('%s')" % value)
 
     if 'latitude_bounds' in product and 'longitude_bounds' in product:
         location = [product.latitude_bounds.data, product.longitude_bounds.data]
@@ -264,8 +279,8 @@ def _plot_data(product, value=None, average=False):
         colorlabel = xunit
 
         xdata_dt = np.empty(len(product.datetime.data), dtype='datetime64[s]')  # TODO ns?
-        offset = (datetime.datetime(2000,1,1)-datetime.datetime(1970,1,1)).total_seconds()
-        xdata_dt[:] = (product.datetime.data*24*60*60) + offset
+        offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
+        xdata_dt[:] = (product.datetime.data * 24 * 60 * 60) + offset
 
         coords = (xdata_dt, product.altitude.data)
 
@@ -275,13 +290,13 @@ def _plot_data(product, value=None, average=False):
     if xunit is not None:
         if xunit == 'seconds since 2010-01-01':  # TODO generalize (start of epoch.. more formats?)
             xdata_dt = np.empty(len(xdata), dtype='datetime64[s]')  # TODO ns?
-            offset = (datetime.datetime(2010,1,1)-datetime.datetime(1970,1,1)).total_seconds()
+            offset = (datetime(2010, 1, 1) - datetime(1970, 1, 1)).total_seconds()
             xdata_dt[:] = xdata + offset
             xdata = xdata_dt
         if xunit == 'days since 2000-01-01':
             xdata_dt = np.empty(len(product.datetime.data), dtype='datetime64[s]')  # TODO ns?
-            offset = (datetime.datetime(2000,1,1)-datetime.datetime(1970,1,1)).total_seconds()
-            xdata_dt[:] = (product.datetime.data*24*60*60) + offset
+            offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
+            xdata_dt[:] = (product.datetime.data * 24 * 60 * 60) + offset
             xdata = xdata_dt
         elif xlabel is None:
             xlabel = xunit
@@ -323,59 +338,100 @@ def _mapplot_data(product, value=None, locationOnly=False):
     data_type = kPointData
     latitude = None
     longitude = None
-    if 'latitude_bounds' in list(product) and 'longitude_bounds' in list(product):
+
+    if ('latitude_bounds' in list(product) and
+            'longitude_bounds' in list(product)):
+
         latitude_bounds = product['latitude_bounds']
         longitude_bounds = product['longitude_bounds']
+
         if len(latitude_bounds.dimension) != len(longitude_bounds.dimension):
-            raise ValueError("latitude and longitude bounds should have same number of dimensions")
-        if latitude_bounds.dimension[-1] is not None or longitude_bounds.dimension[-1] is not None:
-            raise ValueError("last dimension for latitude and longitude bounds should be independent")
-        if len(latitude_bounds.dimension) > 1 and latitude_bounds.dimension[-2] == 'latitude' and \
-                longitude_bounds.dimension[-2] == 'longitude':
+            raise ValueError("latitude and longitude bounds should have same"
+                             " number of dimensions")
+
+        if (latitude_bounds.dimension[-1] is not None or
+                longitude_bounds.dimension[-1] is not None):
+            raise ValueError("last dimension for latitude and longitude bounds"
+                             " should be independent")
+
+        if (len(latitude_bounds.dimension) > 1 and
+                latitude_bounds.dimension[-2] == 'latitude' and
+                longitude_bounds.dimension[-2] == 'longitude'):
+
             if len(latitude_bounds.dimension) == 3:
-                if latitude_bounds.dimension[0] != 'time' or longitude_bounds.dimension[0] != 'time':
-                    raise ValueError("first dimension for latitude and longitude bounds should be the time dimension")
+                if (latitude_bounds.dimension[0] != 'time' or
+                        longitude_bounds.dimension[0] != 'time'):
+                    raise ValueError("first dimension for latitude and longitude"
+                                     " bounds should be the time dimension")
             else:
                 if len(latitude_bounds.dimension) != 2:
-                    raise ValueError("latitude and longitude bounds should be "
-                                     "two or three dimensional for gridded data")
-            if latitude_bounds.data.shape[-1] != 2 or longitude_bounds.data.shape[-1] != 2:
-                raise ValueError("independent dimension of latitude and longitude bounds should have "
-                                 "length 2 for gridded data")
+                    raise ValueError("latitude and longitude bounds should be"
+                                     " two or three dimensional for gridded data")
+
+            if (latitude_bounds.data.shape[-1] != 2 or
+                    longitude_bounds.data.shape[-1] != 2):
+                raise ValueError("independent dimension of latitude and longitude"
+                                 " bounds should have length 2 for gridded data")
             data_type = kGridData
             latitude = _get_midpoint_axis_from_bounds(latitude_bounds)
             longitude = _get_midpoint_axis_from_bounds(longitude_bounds)
+
         elif not locationOnly:
             if len(latitude_bounds.dimension) != 2:
-                raise ValueError("latitude and longitude bounds should be two dimensional for non-gridded data")
-            if latitude_bounds.dimension[0] != 'time' or longitude_bounds.dimension[0] != 'time':
-                raise ValueError("first dimension for latitude and longitude bounds should be the time dimension")
+                raise ValueError("latitude and longitude bounds should be two"
+                                 " dimensional for non-gridded data")
+
+            if (latitude_bounds.dimension[0] != 'time' or
+                    longitude_bounds.dimension[0] != 'time'):
+                raise ValueError("first dimension for latitude and longitude"
+                                 " bounds should be the time dimension")
+
             if latitude_bounds.data.shape != longitude_bounds.data.shape:
-                raise ValueError("latitude and longitude bounds should have the same dimension lengths")
+                raise ValueError("latitude and longitude bounds should have"
+                                 " the same dimension lengths")
+
             data_type = kSwathData
             latitude = latitude_bounds
             longitude = longitude_bounds
-    if data_type != kSwathData and 'latitude' in list(product) and 'longitude' in list(product):
+
+    if (data_type != kSwathData and
+            'latitude' in list(product) and
+            'longitude' in list(product)):
+
         latitude = product['latitude']
         longitude = product['longitude']
+
         if len(latitude.dimension) != len(longitude.dimension):
-            raise ValueError("latitude and longitude should have same number of dimensions")
-        if len(latitude.dimension) > 0 and latitude.dimension[-1] == 'latitude' and \
-                longitude.dimension[-1] == 'longitude':
+            raise ValueError("latitude and longitude should have same number"
+                             " of dimensions")
+
+        if (len(latitude.dimension) > 0 and
+                latitude.dimension[-1] == 'latitude' and
+                longitude.dimension[-1] == 'longitude'):
+
             # if we have both lat/lon center and lat/lon bounds then use the center lat/lon for the grid axis
             if len(latitude.dimension) == 2:
-                if latitude.dimension[0] != 'time' or longitude.dimension[0] != 'time':
-                    raise ValueError("first dimension for latitude and longitude should be the time dimension")
+                if (latitude.dimension[0] != 'time' or
+                        longitude.dimension[0] != 'time'):
+                    raise ValueError("first dimension for latitude and longitude"
+                                     " should be the time dimension")
             else:
                 if len(latitude.dimension) != 1:
-                    raise ValueError("latitude and longitude should be one or two dimensional")
+                    raise ValueError("latitude and longitude should be one or two"
+                                     " dimensional")
             data_type = kGridData
+
         else:
             if len(latitude.dimension) != 1:
-                raise ValueError("latitude and longitude should be one dimensional")
-            if latitude.dimension[0] != 'time' or longitude.dimension[0] != 'time':
-                raise ValueError("first dimension for latitude and longitude should be the time dimension")
+                raise ValueError("latitude and longitude should be one"
+                                 " dimensional")
+
+            if (latitude.dimension[0] != 'time' or
+                    longitude.dimension[0] != 'time'):
+                raise ValueError("first dimension for latitude and longitude"
+                                 " should be the time dimension")
             data_type = kPointData
+
     if latitude is None or longitude is None:
         raise ValueError("HARP product has no latitude/longitude information")
 
@@ -411,7 +467,7 @@ def _mapplot_data(product, value=None, locationOnly=False):
             if value not in variable_names:
                 raise ValueError("product variable is not plottable ('%s')" % value)
         else:
-            value = _get_prefered_value(variable_names, _UNPREFERED_PATTERNS)
+            value = _get_prefered_value(variable_names)
 
     data = None
     attr = {}
@@ -445,7 +501,7 @@ def volume_data(product, value, spherical=False, **kwargs):
 
     data = product[value].data
 
-    if spherical: # TODO add earth somehow
+    if spherical:  # TODO add earth somehow
         source_crs = pyproj.CRS('epsg:4326')
         target_crs = pyproj.crs.GeocentricCRS('epsg:6326')
 
@@ -465,23 +521,24 @@ def volume_data(product, value, spherical=False, **kwargs):
             for ilon, lon in enumerate(lons):
                 for ialt, alt in enumerate(alts):
                     value = data[ilat][ilon][ialt]  # TODO assuming (lat,lon,alt) dimension (order)
-                    point = list(trans.itransform([[lat, lon, ((alt-altmin)/(altmax-altmin))*3e6]]))[0]  # TODO auto scale
+                    point = list(trans.itransform([[lat, lon, ((alt - altmin) / (altmax - altmin)) * 3e6]]))[0]
                     points.append(point)
                     values.append(value)
 
-        # add inner layer, to make 'nearest' not fill up earth.. TODO better solution (add outer 'nan' layers to data? or arg to interp engine?)
-        for ilon in np.arange(0,360):
-            for ilat in np.arange(0,180):
+        # TODO better solution (add outer 'nan' layers to data? or arg to interp engine?)
+        # add inner layer, to make 'nearest' not fill up earth..
+        for ilon in np.arange(0, 360):
+            for ilat in np.arange(0, 180):
                 value = np.nan
-                point = list(trans.itransform([[ilat-90, ilon, -1e5]]))[0]
+                point = list(trans.itransform([[ilat - 90, ilon, -1e5]]))[0]
                 points.append(point)
                 values.append(value)
 
         # outer layer
-        for ilon in np.arange(0,360):
-            for ilat in np.arange(0,180):
+        for ilon in np.arange(0, 360):
+            for ilat in np.arange(0, 180):
                 value = np.nan
-                point = list(trans.itransform([[ilat-90, ilon, 3.1e6]]))[0] # TODO
+                point = list(trans.itransform([[ilat - 90, ilon, 3.1e6]]))[0]  # TODO
                 points.append(point)
                 values.append(value)
 
