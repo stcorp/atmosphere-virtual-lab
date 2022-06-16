@@ -113,7 +113,9 @@ class MapPlot:
         zoom -- Zoom factor
 
         """
-        self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom, scroll_wheel_zoom=True, layout=Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px'))
+        layout = Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px')
+        self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom,
+                                   scroll_wheel_zoom=True, layout=layout)
         self._traces = []
         self._pointsize = pointsize
         self._opacity = opacity
@@ -171,9 +173,11 @@ class MapPlot:
 class MapPlot3D:
     """3D Map Plot type
     """
+
+    # TODO pointsize, colormap, colorrange.. settable per-trace
     def __init__(self, showcolorbar=True, colorrange=None, size=(640, 480),
-              centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, # TODO pointsize, colormap, colorrange.. settable per-trace
-              zoom=None, colormap=None, **kwargs):
+                 centerlon=0, centerlat=0, opacity=0.6, pointsize=None,
+                 heightfactor=None, zoom=None, colormap=None, **kwargs):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
@@ -228,7 +232,12 @@ class MapPlot3D:
 
             lut = self.lookup_table(kwargs['data'])
 
-            data_actor = self.data_actor(kwargs['latitude'], kwargs['longitude'], kwargs['data'], lut, kwargs.get('heightfactor'), kwargs.get('opacity'))
+            # TODO just pass kwargs
+            data_actor = self.data_actor(kwargs['latitude'],
+                                         kwargs['longitude'], kwargs['data'],
+                                         lut, kwargs.get('heightfactor'),
+                                         kwargs.get('opacity'))
+
             colorbar_actor = self.colorbar_actor(lut)
 
             self._renderer.AddActor(data_actor)
@@ -237,7 +246,6 @@ class MapPlot3D:
                 self._renderer.AddActor(colorbar_actor)
 
             self._traces.append(trace)
-
 
     def data_actor(self, latitude, longitude, data, lut, heightfactor, opacity):
         data_type = _data_type(latitude, longitude, data)
@@ -253,13 +261,13 @@ class MapPlot3D:
 
             # cells
             cells = np.zeros((len(data), 5), dtype=np.int64)
-            data_idx = np.arange(len(data))*4
+            data_idx = np.arange(len(data)) * 4
 
-            cells[:,0] = 4
-            cells[:,1] = data_idx
-            cells[:,2] = data_idx+1
-            cells[:,3] = data_idx+2
-            cells[:,4] = data_idx+3
+            cells[:, 0] = 4
+            cells[:, 1] = data_idx
+            cells[:, 2] = data_idx + 1
+            cells[:, 3] = data_idx + 2
+            cells[:, 4] = data_idx + 3
 
         # grid data: polygons across grid
         elif data_type == _kGridData:
@@ -268,7 +276,7 @@ class MapPlot3D:
             lat_offset = (latitude[1] - latitude[0]) / 2
 
             # crossing latitude boundaries (<90 or >90)
-            latitude_plus = np.append(latitude - lat_offset, latitude[-1]+lat_offset)
+            latitude_plus = np.append(latitude - lat_offset, latitude[-1] + lat_offset)
             if latitude_plus[0] < -90:
                 latitude_plus[0] = -180 - latitude_plus[0]
             if latitude_plus[-1] > 90:
@@ -278,7 +286,8 @@ class MapPlot3D:
             longrid, latgrid = np.meshgrid(longitude_plus, latitude_plus)
 
             if heightfactor is not None:
-                arrz = heightfactor*2e6*np.pad(data, ((0,1),(0,1)), 'edge')  # TODO correctness, points, swaths, match visan
+                # TODO correctness, points, swaths, match visan
+                arrz = heightfactor * 2e6 * np.pad(data, ((0, 1), (0, 1)), 'edge')
             else:
                 arrz = np.zeros(latgrid.shape)
 
@@ -294,14 +303,14 @@ class MapPlot3D:
             flatlat = latgrid.flatten()
 
             nlon = len(longitude_plus)
-            f1 = flatlat*nlon+flatlon
-            f2 = (flatlat+1)*nlon+flatlon
+            f1 = flatlat * nlon + flatlon
+            f2 = (flatlat + 1) * nlon + flatlon
 
-            cells[:,0] = 4
-            cells[:,1] = f1
-            cells[:,2] = f1+1
-            cells[:,3] = f2+1
-            cells[:,4] = f2
+            cells[:, 0] = 4
+            cells[:, 1] = f1
+            cells[:, 2] = f1 + 1
+            cells[:, 3] = f2 + 1
+            cells[:, 4] = f2
 
         # point data
         elif data_type == _kPointData:
@@ -314,8 +323,8 @@ class MapPlot3D:
 
             # cells
             cells = np.zeros((arr.shape[0], 2), dtype=np.int64)
-            cells[:,0] = 1
-            cells[:,1] = np.arange(arr.shape[0])
+            cells[:, 0] = 1
+            cells[:, 1] = np.arange(arr.shape[0])
 
         else:
             raise Exception('unsupported datatype')
@@ -364,17 +373,17 @@ class MapPlot3D:
         if isinstance(colormap, list):  # TODO interpolation mode as in visan? (sqrt, scurve).. use vtk SetRampTo*?
             # TODO check again, as vtk should have all this builtin..
             for i in range(256):
-                x = i*(1./255)
+                x = i * (1. / 255)
                 for idx in range(len(colormap)):
                     x1, r1, g1, b1, a1 = colormap[idx]
-                    x2, r2, g2, b2, a2 = colormap[idx+1]
+                    x2, r2, g2, b2, a2 = colormap[idx + 1]
                     if x1 <= x <= x2:
-                        weight = (x-x1)/(x2-x1)
+                        weight = (x - x1) / (x2 - x1)
 
-                        r = (1-weight)*r1 + weight*r2
-                        g = (1-weight)*g1 + weight*g2
-                        b = (1-weight)*b1 + weight*b2
-                        a = (1-weight)*a1 + weight*a2
+                        r = (1 - weight) * r1 + weight * r2
+                        g = (1 - weight) * g1 + weight * g2
+                        b = (1 - weight) * b1 + weight * b2
+                        a = (1 - weight) * a1 + weight * a2
 
                         lut.SetTableValue(i, r, g, b, a)
                         break
@@ -418,7 +427,7 @@ class MapPlot3D:
             texture.Update()
 
         transformTexture = vtk.vtkTransformTextureCoords()
-        transformTexture.SetInputConnection(sphere.GetOutputPort());
+        transformTexture.SetInputConnection(sphere.GetOutputPort())
         transformTexture.SetPosition(0.5, 0, 0)
 
         sphere_mapper = vtk.vtkPolyDataMapper()
@@ -439,8 +448,8 @@ class MapPlot3D:
         dist = 3e10 - (self.zoom or 0) * 2e9  # TODO incorrect/different
         cx, cy, cz = pyproj.transform(self.p1, self.p2, self.centerlon, self.centerlat, dist)
         camera.SetPosition(cx, cy, cz)
-        camera.SetViewUp(0,0,1)
-        camera.SetFocalPoint(0,0,0)
+        camera.SetViewUp(0, 0, 1)
+        camera.SetFocalPoint(0, 0, 0)
 
         # renderer
         self._renderer = vtk.vtkRenderer()
@@ -459,10 +468,14 @@ class MapPlot3D:
         display(pn.pane.VTK(self._renderwindow, width=self.size[0], height=self.size[1]))
 
 
-def VolumePlot(data=None, size=(640, 1000), scale=(1,1,1), display_slices=True, display_volume=True, **kwargs): # TODO add trace? specify physical north..?
+# TODO add trace? specify physical north..?
+def VolumePlot(data=None, size=(640, 1000), scale=(1, 1, 1),
+               display_slices=True, display_volume=True, **kwargs):
     pn.extension(sizing_mode='stretch_width')
     data = np.nan_to_num(data, np.nanmin(data))  # known issue in vtk.js that it doesn't handle nans
-    plot = pn.pane.VTKVolume(data, width=size[0], height=size[1], display_slices=display_slices, display_volume=display_volume, spacing=scale)
+    plot = pn.pane.VTKVolume(data, width=size[0], height=size[1],
+                             display_slices=display_slices,
+                             display_volume=display_volume, spacing=scale)
     plot = pn.Row(plot.controls(jslink=True), plot)
     return plot
 
@@ -497,8 +510,9 @@ def Geo3D(latitude, longitude, data=None, **kwargs):
     return mapplot3d
 
 
-def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None, pointsize=None,
-         xnumticks=None, ynumticks=None, xerror=None, yerror=None, lines=False, **kwargs):
+def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
+            pointsize=None, xnumticks=None, ynumticks=None, xerror=None,
+            yerror=None, lines=False, **kwargs):
 
     layout = {
         'title': title,
@@ -536,14 +550,14 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None, points
     if xerror is not None:  # TODO y
         fig.add(Trace(
             'scatter',
-            x=xdata-xerror,
+            x=xdata - xerror,
             y=ydata,
             line={'width': 0},
             showlegend=False,
         ))
         fig.add(Trace(
             'scatter',
-            x=xdata+xerror,
+            x=xdata + xerror,
             y=ydata,
             fill='tonexty',
             line={'width': 0},
@@ -569,17 +583,17 @@ def Histogram(data=None, bins=None, **kwargs):
 
     fig.add(Trace(
         'histogram',
-        x = data,
-        nbinsx = bins*2 if bins else None,  # TODO why *2 needed
-        name = kwargs['title'],
-        opacity = 0.6
+        x=data,
+        nbinsx=bins * 2 if bins else None,  # TODO why *2 needed
+        name=kwargs['title'],
+        opacity=0.6
     ))
 
     return fig
 
 
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
-        colorlabel=None, gap_threshold=None, colormap=None, **kwargs):
+            colorlabel=None, gap_threshold=None, colormap=None, **kwargs):
     xcoords, ycoords = coords
 
     layout = {
@@ -597,7 +611,7 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
     # insert gaps
     if gap_threshold is None:
         gap_threshold = np.timedelta64(24, 'h')
-    halfgap = gap_threshold / 2;
+    halfgap = gap_threshold / 2
 
     xdata_new = []
     xcoords_new = []
@@ -605,26 +619,26 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
         xdata_new.append(data[i])
 
         if i == 0:
-            xcoords_new.append(xcoords[i]-halfgap)
-        if i < len(data)-1:
-            if xcoords[i+1] - xcoords[i] > gap_threshold:
+            xcoords_new.append(xcoords[i] - halfgap)
+        if i < len(data) - 1:
+            if xcoords[i + 1] - xcoords[i] > gap_threshold:
                 xcoords_new.append(xcoords[i] + halfgap)
-                xcoords_new.append(xcoords[i+1] - halfgap)
+                xcoords_new.append(xcoords[i + 1] - halfgap)
 
-                xdata_new.append(np.array([np.NaN]*len(ycoords)))
+                xdata_new.append(np.array([np.NaN] * len(ycoords)))
             else:
-                xcoords_new.append(xcoords[i] + ((xcoords[i+1] - xcoords[i]) / 2))
+                xcoords_new.append(xcoords[i] + ((xcoords[i + 1] - xcoords[i]) / 2))
         else:
-            xcoords_new.append(xcoords[i]+halfgap)
+            xcoords_new.append(xcoords[i] + halfgap)
 
     data = np.array(xdata_new)
     xcoords = xcoords_new
 
     if isinstance(colormap, list):
-        colorscale = [[x, 'rgb'+str((255*r, 255*g, 255*b, a))] for (x,r,g,b,a) in colormap]
+        colorscale = [[x, 'rgb' + str((255 * r, 255 * g, 255 * b, a))] for (x, r, g, b, a) in colormap]
     else:
         cmap = matplotlib.cm.get_cmap(colormap or 'viridis')
-        colorscale = [[i*1./255, 'rgb'+str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
+        colorscale = [[i * 1. / 255, 'rgb' + str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
 
     fig.add(Trace(
         'heatmap',
