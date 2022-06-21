@@ -475,7 +475,7 @@ def VolumePlot(data=None, size=(640, 1000), scale=(1, 1, 1),
     data = np.nan_to_num(data, np.nanmin(data))  # known issue in vtk.js that it doesn't handle nans
     plot = pn.pane.VTKVolume(data, width=size[0], height=size[1],
                              display_slices=display_slices,
-                             display_volume=display_volume, spacing=scale)
+                             display_volume=display_volume, spacing=scale, max_data_size=1000)
     plot = pn.Row(plot.controls(jslink=True), plot)
     return plot
 
