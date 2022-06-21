@@ -476,7 +476,7 @@ def VolumePlot(data=None, size=(640, 1000), scale=(1, 1, 1),
     plot = pn.pane.VTKVolume(data, width=size[0], height=size[1],
                              display_slices=display_slices,
                              display_volume=display_volume, spacing=scale, max_data_size=1000)
-    plot = pn.Row(plot.controls(jslink=True), plot)
+    plot = pn.Row(plot.controls(jslink=False), plot)
     return plot
 
 
