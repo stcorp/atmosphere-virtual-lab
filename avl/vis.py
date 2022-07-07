@@ -271,18 +271,23 @@ class MapPlot3D:
 
         # grid data: polygons across grid
         elif data_type == _kGridData:
-            # data points
-            lon_offset = (longitude[1] - longitude[0]) / 2
-            lat_offset = (latitude[1] - latitude[0]) / 2
+            # determine midpoints between data points
+            # TODO surely numpy has this builtin somehow
+            lon1 = np.append(longitude[0] - (longitude[1] - longitude[0]), longitude)
+            lon2 = np.append(longitude, longitude[-1] + (longitude[-1] - longitude[-2]))
+            longitude_plus = (lon1 + lon2) / 2
+
+            lat1 = np.append(latitude[0] - (latitude[1] - latitude[0]), latitude)
+            lat2 = np.append(latitude, latitude[-1] + (latitude[-1] - latitude[-2]))
+            latitude_plus = (lat1 + lat2) / 2
 
             # crossing latitude boundaries (<90 or >90)
-            latitude_plus = np.append(latitude - lat_offset, latitude[-1] + lat_offset)
             if latitude_plus[0] < -90:
                 latitude_plus[0] = -180 - latitude_plus[0]
             if latitude_plus[-1] > 90:
                 latitude_plus[-1] = 180 - latitude_plus[-1]
 
-            longitude_plus = np.append(longitude - lon_offset, longitude[-1] + lon_offset)
+            # create mesh grid from midpoints
             longrid, latgrid = np.meshgrid(longitude_plus, latitude_plus)
 
             if heightfactor is not None:
@@ -291,11 +296,12 @@ class MapPlot3D:
             else:
                 arrz = np.zeros(latgrid.shape)
 
+            # transform to 3d vtk points
             fx, fy, fz = pyproj.transform(self.p1, self.p2, longrid.flat, latgrid.flat, arrz.flat)
             arr = np.column_stack([fx, fy, fz])
             data_points = numpyTovtkDataArray(arr)
 
-            # cells
+            # create vtk cells
             cells = np.zeros((len(latitude) * len(longitude), 5), dtype=np.int64)
 
             longrid, latgrid = np.meshgrid(range(len(longitude)), range(len(latitude)))
