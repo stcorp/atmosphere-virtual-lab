@@ -493,6 +493,11 @@ class Trace:
 
 
 def Geo(latitude, longitude, data=None, **kwargs):
+    latitude = np.asarray(latitude)
+    longitude = np.asarray(longitude)
+    if data is not None:
+        data = np.asarray(data)
+
     mapplot = MapPlot(**kwargs)
     mapplot.add(Trace(
         'geo',
@@ -505,6 +510,11 @@ def Geo(latitude, longitude, data=None, **kwargs):
 
 
 def Geo3D(latitude, longitude, data=None, **kwargs):
+    latitude = np.asarray(latitude)
+    longitude = np.asarray(longitude)
+    if data is not None:
+        data = np.asarray(data)
+
     mapplot3d = MapPlot3D(**kwargs)
     mapplot3d.add(Trace(
         'geo3d',
@@ -519,6 +529,8 @@ def Geo3D(latitude, longitude, data=None, **kwargs):
 def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             pointsize=None, xnumticks=None, ynumticks=None, xerror=None,
             yerror=None, lines=False, **kwargs):
+    xdata = np.asarray(xdata)
+    ydata = np.asarray(ydata)
 
     layout = {
         'title': title,
@@ -578,7 +590,9 @@ def Line(*args, **kwargs):
     return Scatter(*args, lines=True, **kwargs)
 
 
-def Histogram(data=None, bins=None, **kwargs):
+def Histogram(data, bins=None, **kwargs):
+    data = np.asarray(data)
+
     layout = {  # TODO dedupe
         'title_text': kwargs['title'],
         'xaxis_title_text': kwargs['ylabel'],  # TODO
@@ -598,9 +612,13 @@ def Histogram(data=None, bins=None, **kwargs):
     return fig
 
 
+# TODO separate xcoords, ycoords
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
             colorlabel=None, gap_threshold=None, colormap=None, **kwargs):
     xcoords, ycoords = coords
+    xcoords = np.asarray(xcoords)
+    ycoords = np.asarray(ycoords)
+    data = np.asarray(data)
 
     layout = {
         'title': title,
