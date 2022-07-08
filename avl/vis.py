@@ -272,7 +272,6 @@ class MapPlot3D:
         # grid data: polygons across grid
         elif data_type == _kGridData:
             # determine midpoints between data points
-            # TODO surely numpy has this builtin somehow
             lon1 = np.append(longitude[0] - (longitude[1] - longitude[0]), longitude)
             lon2 = np.append(longitude, longitude[-1] + (longitude[-1] - longitude[-2]))
             longitude_plus = (lon1 + lon2) / 2
@@ -420,7 +419,7 @@ class MapPlot3D:
 
     def sphere_actor(self):
         sphere = vtk.vtkTexturedSphereSource()
-        sphere.SetRadius(6e9)  # TODO do we want to normale to 1?
+        sphere.SetRadius(6e9)  # TODO do we want to normalize to 1?
         sphere.SetPhiResolution(30)
         sphere.SetThetaResolution(60)
 
