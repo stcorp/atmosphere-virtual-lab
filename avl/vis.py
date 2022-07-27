@@ -271,20 +271,27 @@ class MapPlot3D:
 
         # grid data: polygons across grid
         elif data_type == _kGridData:
-            # determine midpoints between data points
-            lon1 = np.append(longitude[0] - (longitude[1] - longitude[0]), longitude)
-            lon2 = np.append(longitude, longitude[-1] + (longitude[-1] - longitude[-2]))
-            longitude_plus = (lon1 + lon2) / 2
+            # lat, lon mesh provided
+            if latitude.shape[0] == data.shape[0] + 1 and longitude.shape[0] == data.shape[1] + 1:
+                latitude_plus = latitude
+                longitude_plus = longitude
 
-            lat1 = np.append(latitude[0] - (latitude[1] - latitude[0]), latitude)
-            lat2 = np.append(latitude, latitude[-1] + (latitude[-1] - latitude[-2]))
-            latitude_plus = (lat1 + lat2) / 2
+            # otherwise, interpolate mesh points
+            else:
+                # determine midpoints between data points
+                lon1 = np.append(longitude[0] - (longitude[1] - longitude[0]), longitude)
+                lon2 = np.append(longitude, longitude[-1] + (longitude[-1] - longitude[-2]))
+                longitude_plus = (lon1 + lon2) / 2
 
-            # crossing latitude boundaries (<90 or >90)
-            if latitude_plus[0] < -90:
-                latitude_plus[0] = -180 - latitude_plus[0]
-            if latitude_plus[-1] > 90:
-                latitude_plus[-1] = 180 - latitude_plus[-1]
+                lat1 = np.append(latitude[0] - (latitude[1] - latitude[0]), latitude)
+                lat2 = np.append(latitude, latitude[-1] + (latitude[-1] - latitude[-2]))
+                latitude_plus = (lat1 + lat2) / 2
+
+                # crossing latitude boundaries (<90 or >90)
+                if latitude_plus[0] < -90:
+                    latitude_plus[0] = -180 - latitude_plus[0]
+                if latitude_plus[-1] > 90:
+                    latitude_plus[-1] = 180 - latitude_plus[-1]
 
             # create mesh grid from midpoints
             longrid, latgrid = np.meshgrid(longitude_plus, latitude_plus)
@@ -301,9 +308,9 @@ class MapPlot3D:
             data_points = numpyTovtkDataArray(arr)
 
             # create vtk cells
-            cells = np.zeros((len(latitude) * len(longitude), 5), dtype=np.int64)
+            cells = np.zeros((data.size, 5), dtype=np.int64)
 
-            longrid, latgrid = np.meshgrid(range(len(longitude)), range(len(latitude)))
+            longrid, latgrid = np.meshgrid(range(data.shape[1]), range(data.shape[0]))
             flatlon = longrid.flatten()
             flatlat = latgrid.flatten()
 
