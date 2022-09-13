@@ -656,7 +656,8 @@ def Heatmap(product, value, **kwargs):
     Arguments:
     product -- Harp product
     value -- Harp variable name
-    colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+    colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
+                or (x,r,g,b,a) values (ranging from 0..1)
     gap_threshold -- Add gaps when larger (np.timedelta, default 24h)
 
     """

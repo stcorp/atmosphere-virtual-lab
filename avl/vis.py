@@ -52,6 +52,24 @@ def _data_type(latitude, longitude, data):  # TODO check that shapes match
     return data_type
 
 
+def _check_colormap(colormap):
+    if isinstance(colormap, list):
+        if len(colormap) < 2:
+            raise Exception('colormap requires at least 2 colors')
+
+        if len(set(len(elem) for elem in colormap)) > 1:
+            raise Exception('colormap entries must be of same length')
+
+        if len(colormap[0]) not in (3, 4, 5):
+            raise Exception('colormap entries must have a length of 3, 4 or 5')
+
+    elif isinstance(colormap, str):
+        pass
+
+    elif colormap is not None:
+        raise Exception('unsupported type of colormap')
+
+
 # TODO add BasePlot, merge add methods?
 
 class Plot:  # TODO
@@ -383,6 +401,12 @@ class MapPlot3D:
         colormap = self.colormap
 
         if isinstance(colormap, list):  # TODO interpolation mode as in visan? (sqrt, scurve).. use vtk SetRampTo*?
+            if len(colormap) < 2:
+                raise Exception('at least 2 colors required for colormap')
+
+            if len(set(len(elem) for elem in colormap)) > 1:
+                raise Exception('colormap entries of different length')
+
             # TODO check again, as vtk should have all this builtin..
             for i in range(256):
                 x = i * (1. / 255)
@@ -621,6 +645,8 @@ def Histogram(data, bins=None, **kwargs):
 # TODO separate xcoords, ycoords
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
             colorlabel=None, gap_threshold=None, colormap=None, **kwargs):
+    _check_colormap(colormap)
+
     xcoords, ycoords = coords
     xcoords = np.asarray(xcoords)
     ycoords = np.asarray(ycoords)
@@ -665,7 +691,19 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
     xcoords = xcoords_new
 
     if isinstance(colormap, list):
-        colorscale = [[x, 'rgb' + str((255 * r, 255 * g, 255 * b, a))] for (x, r, g, b, a) in colormap]
+        if len(colormap[0]) in (3, 4):
+            colorspace = zip(np.linspace(0, 1, len(colormap)), colormap)
+
+            # (r,g,b)
+            if len(colormap[0]) == 3:
+                colormap = [(x,) + color + (1.0,) for x, color in colorspace]
+
+            # (r,g,b,a)
+            else:
+                colormap = [(x,) + color for x, color in colorspace]
+
+        colorscale = [(x, 'rgb' + str((255 * r, 255 * g, 255 * b, a))) for (x, r, g, b, a) in colormap]
+
     else:
         cmap = matplotlib.cm.get_cmap(colormap or 'viridis')
         colorscale = [[i * 1. / 255, 'rgb' + str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
