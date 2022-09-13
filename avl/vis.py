@@ -200,7 +200,8 @@ class MapPlot3D:
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
-        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+        colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
+                    or (x,r,g,b,a) values (ranging from 0..1)
         colorrange -- Color range to use (default min, max of data)
         heightfactor -- Scale height
         opacity -- Opacity (default 0.6)
@@ -210,6 +211,8 @@ class MapPlot3D:
         zoom -- Zoom factor
 
         """
+        _check_colormap(colormap)
+
         self.showcolorbar = showcolorbar
         self.colorrange = colorrange
         self.size = size
@@ -401,18 +404,23 @@ class MapPlot3D:
         colormap = self.colormap
 
         if isinstance(colormap, list):  # TODO interpolation mode as in visan? (sqrt, scurve).. use vtk SetRampTo*?
-            if len(colormap) < 2:
-                raise Exception('at least 2 colors required for colormap')
-
-            if len(set(len(elem) for elem in colormap)) > 1:
-                raise Exception('colormap entries of different length')
+            xspace = np.linspace(0, 1, len(colormap))
 
             # TODO check again, as vtk should have all this builtin..
             for i in range(256):
                 x = i * (1. / 255)
-                for idx in range(len(colormap)):
-                    x1, r1, g1, b1, a1 = colormap[idx]
-                    x2, r2, g2, b2, a2 = colormap[idx + 1]
+
+                for idx in range(len(colormap)):  # TODO if we keep this, optimize nested loop
+                    if len(colormap[idx]) == 3:
+                        x1, (r1, g1, b1), a1 = xspace[idx], colormap[idx], 1.0
+                        x2, (r2, g2, b2), a2 = xspace[idx + 1], colormap[idx + 1], 1.0
+                    elif len(colormap[idx]) == 4:
+                        x1, (r1, g1, b1, a1) = xspace[idx], colormap[idx]
+                        x2, (r2, g2, b2, a2) = xspace[idx + 1], colormap[idx + 1]
+                    else:
+                        x1, r1, g1, b1, a1 = colormap[idx]
+                        x2, r2, g2, b2, a2 = colormap[idx + 1]
+
                     if x1 <= x <= x2:
                         weight = (x - x1) / (x2 - x1)
 
