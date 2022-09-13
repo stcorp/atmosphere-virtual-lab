@@ -6,6 +6,7 @@ from IPython.display import display
 from ipywidgets import Layout
 import ipyleaflet
 import matplotlib  # TODO access colormaps differently? use separate project?
+import cmcrameri
 import numpy as np
 import panel as pn
 import plotly.graph_objects as go
@@ -68,6 +69,19 @@ def _check_colormap(colormap):
 
     elif colormap is not None:
         raise Exception('unsupported type of colormap')
+
+
+def _resolve_colormap(colormap):
+    if colormap is None:
+        return 'viridis'
+    else:
+        try:
+            return matplotlib.cm.get_cmap('cmc.' + colormap)
+        except ValueError:
+            try:
+                return matplotlib.cm.get_cmap(colormap)
+            except ValueError:
+                raise Exception('unsupported colormap: ' + colormap)
 
 
 # TODO add BasePlot, merge add methods?
@@ -432,8 +446,7 @@ class MapPlot3D:
                         lut.SetTableValue(i, r, g, b, a)
                         break
         else:
-            colormap = colormap or 'viridis'
-            cmap = matplotlib.cm.get_cmap(colormap)
+            cmap = _resolve_colormap(colormap)
             for i in range(256):
                 lut.SetTableValue(i, *cmap.colors[i])
 
@@ -713,7 +726,7 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
         colorscale = [(x, 'rgb' + str((255 * r, 255 * g, 255 * b, a))) for (x, r, g, b, a) in colormap]
 
     else:
-        cmap = matplotlib.cm.get_cmap(colormap or 'viridis')
+        cmap = _resolve_colormap(colormap)
         colorscale = [[i * 1. / 255, 'rgb' + str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
 
     fig.add(Trace(
