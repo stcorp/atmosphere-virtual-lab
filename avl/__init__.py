@@ -669,7 +669,8 @@ def geo_data(product, value, **kwargs):
     return _mapplot_data(product, value)
 
 
-def Geo(product, value, **kwargs):
+def Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6,
+        pointsize=2, **kwargs):
     """
     Return a Geo data trace for the given Harp variable.
 
@@ -678,17 +679,23 @@ def Geo(product, value, **kwargs):
     Arguments:
     product -- Harp product
     value -- Harp variable name
+    colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+    colorrange -- Color range to use (default min, max of data)
+    opacity -- Opacity (default 0.6)
+    pointsize -- Point size (for point data)
 
     """
     data = geo_data(product, value)
-    return vis.Geo(**data, **kwargs)
+    return vis.Geo(colormap=colormap, colorrange=colorrange, opacity=opacity,
+                   pointsize=pointsize, **data, **kwargs)
 
 
 def geo3d_data(product, value, **kwargs):
     return _mapplot_data(product, value)
 
 
-def Geo3D(product, value, **kwargs):
+def Geo3D(product, value, colormap='viridis', colorrange=None, heightfactor=None,
+          opacity=0.6, pointsize=None, showcolorbar=True, **kwargs):
     """
     Return a Geo3D data trace for the given Harp variable.
 
@@ -697,7 +704,16 @@ def Geo3D(product, value, **kwargs):
     Arguments:
     product -- Harp product
     value -- Harp variable name
+    colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
+                or (x,r,g,b,a) values (ranging from 0..1)
+    colorrange -- Color range to use (default min, max of data)
+    heightfactor -- Scale height
+    opacity -- Opacity (default 0.6)
+    pointsize -- Point size
+    showcolorbar -- Show colorbar (default True)
 
     """
     data = geo3d_data(product, value)
-    return vis.Geo3D(**data, **kwargs)
+    return vis.Geo3D(colormap=colormap, colorrange=colorrange, heightfactor=heightfactor,
+                     opacity=opacity, pointsize=pointsize, showcolorbar=showcolorbar,
+                     **data, **kwargs)

@@ -133,17 +133,11 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    # TODO move several args to be per-trace
-    def __init__(self, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=0.6,
-                 pointsize=2, zoom=1, size=(800, 400), colormap=None, **kwargs):
+    def __init__(self, centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1, **kwargs):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
-        colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
-        colorrange -- Color range to use (default min, max of data)
-        opacity -- Opacity (default 0.6)
-        pointsize -- Point size
         size -- Plot size in pixels (default (640, 480))
         zoom -- Zoom factor
 
@@ -152,10 +146,6 @@ class MapPlot:
         self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom,
                                    scroll_wheel_zoom=True, layout=layout)
         self._traces = []
-        self._pointsize = pointsize
-        self._opacity = opacity
-        self._colorrange = colorrange
-        self._colormap = colormap
 
     def getMap(self):
         return self._map
@@ -176,16 +166,8 @@ class MapPlot:
         for trace in traces:
             kwargs = trace.kwargs
             data_type = _data_type(kwargs['latitude'], kwargs['longitude'], kwargs['data'])
-
-            opacity = kwargs.get('opacity')
-            if opacity is None:
-                if self._opacity is not None:
-                    opacity = self._opacity
-
-            colorrange = kwargs.get('colorrange')
-            if colorrange is None:
-                if self._colorrange is not None:
-                    colorrange = self._colorrange
+            opacity = kwargs['opacity']
+            colorrange = kwargs['colorrange']
 
             featureGlWrapper = IpyleafletGlVectorLayerWrapper()
             args = {
@@ -194,9 +176,9 @@ class MapPlot:
                 "data": kwargs['data'],
                 "colorrange": list(colorrange) if colorrange is not None else None,
                 "plot_type": ['points', 'swath', 'grid'][data_type],  # TODO use names everywhere
-                "pointsize": self._pointsize,
-                "opacity": opacity if opacity is not None else self._opacity,
-                "colormap": self._colormap
+                "pointsize": kwargs['pointsize'],
+                "opacity": kwargs['opacity'],
+                "colormap": kwargs['colormap'],
             }
             featureGlLayer = IpyleafletGlVectorLayer(**args)
             self._map.add_layer(featureGlWrapper)
@@ -215,7 +197,6 @@ class MapPlot3D:
     """3D Map Plot type
     """
 
-    # TODO pointsize, colormap, colorrange.. settable per-trace.. or even only per-trace?
     def __init__(self, showcolorbar=True, colorrange=None, size=(640, 480),
                  centerlon=0, centerlat=0, opacity=0.6, pointsize=None,
                  heightfactor=None, zoom=None, colormap=None, **kwargs):
@@ -223,28 +204,15 @@ class MapPlot3D:
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
-        colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
-                    or (x,r,g,b,a) values (ranging from 0..1)
-        colorrange -- Color range to use (default min, max of data)
-        heightfactor -- Scale height
-        opacity -- Opacity (default 0.6)
-        pointsize -- Point size
-        showcolorbar -- Show colorbar (default True)
         size -- Plot size in pixels (default (640, 480))
         zoom -- Zoom factor
 
         """
         _check_colormap(colormap)
 
-        self.showcolorbar = showcolorbar
-        self.colorrange = colorrange
         self.size = size
         self.centerlon = centerlon
         self.centerlat = centerlat
-        self.colormap = colormap
-        self.opacity = opacity
-        self.heightfactor = heightfactor
-        self.pointsize = pointsize
         self.zoom = zoom
 
         # 3d projection
@@ -274,26 +242,29 @@ class MapPlot3D:
         for trace in traces:
             kwargs = trace.kwargs
 
-            lut = self.lookup_table(kwargs['data'])
+            lut = self.lookup_table(kwargs['data'], kwargs['colormap'], kwargs['colorrange'])
 
-            # TODO just pass kwargs
+            # TODO just pass kwargs?
             data_actor = self.data_actor(kwargs['latitude'],
-                                         kwargs['longitude'], kwargs['data'],
-                                         lut, kwargs.get('heightfactor'),
-                                         kwargs.get('opacity'))
+                                         kwargs['longitude'],
+                                         kwargs['data'],
+                                         lut,
+                                         kwargs['heightfactor'],
+                                         kwargs['opacity'],
+                                         kwargs['pointsize'])
 
             colorbar_actor = self.colorbar_actor(lut)
 
             self._renderer.AddActor(data_actor)
 
-            if self.showcolorbar:
+            if kwargs['showcolorbar']:
                 self._renderer.AddActor(colorbar_actor)
 
             self._traces.append(trace)
 
         return self
 
-    def data_actor(self, latitude, longitude, data, lut, heightfactor, opacity):
+    def data_actor(self, latitude, longitude, data, lut, heightfactor, opacity, pointsize):
         data_type = _data_type(latitude, longitude, data)
 
         # swath data: polygons for lat/lon boundaries
@@ -415,19 +386,17 @@ class MapPlot3D:
 
         actor = vtk.vtkActor()
         actor.GetProperty().SetOpacity(opacity if opacity is not None else self.opacity)
-        if self.pointsize is not None:
-            actor.GetProperty().SetPointSize(self.pointsize)
+        if pointsize is not None:
+            actor.GetProperty().SetPointSize(pointsize)
         actor.SetMapper(mappert)
 
         return actor
 
-    def lookup_table(self, data):
+    def lookup_table(self, data, colormap, colorrange):
         lut = vtk.vtkLookupTable()
         lut.SetNumberOfTableValues(256)  # TODO configurable
 
         # colormap
-        colormap = self.colormap
-
         if isinstance(colormap, list):  # TODO interpolation mode as in visan? (sqrt, scurve).. use vtk SetRampTo*?
             xspace = np.linspace(0, 1, len(colormap))
 
@@ -465,8 +434,8 @@ class MapPlot3D:
         lut.SetNanColor(0.0, 0.0, 0.0, 0.0)
 
         # data range
-        if self.colorrange is not None:
-            lut.SetTableRange(self.colorrange[0], self.colorrange[1])
+        if colorrange is not None:
+            lut.SetTableRange(colorrange[0], colorrange[1])
         else:
             lut.SetTableRange(np.nanmin(data), np.nanmax(data))
 
