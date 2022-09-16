@@ -73,7 +73,7 @@ def _check_colormap(colormap):
 
 def _resolve_colormap(colormap):
     if colormap is None:
-        return 'viridis'
+        return matplotlib.cm.get_cmap('viridis')
     else:
         try:
             return matplotlib.cm.get_cmap('cmc.' + colormap)
@@ -122,6 +122,8 @@ class Plot:  # TODO
                 self._fig.add_trace(go.Histogram(**trace.kwargs))
             self._traces.append(trace)
 
+        return self
+
     def _ipython_display_(self):
         pn.extension(sizing_mode='stretch_width')
         display(pn.pane.Plotly(self._fig))
@@ -131,7 +133,8 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=0.6,
+    # TODO move several args to be per-trace
+    def __init__(self, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=0.6,
                  pointsize=2, zoom=1, size=(800, 400), colormap=None, **kwargs):
         """
         Arguments:
@@ -151,7 +154,6 @@ class MapPlot:
         self._traces = []
         self._pointsize = pointsize
         self._opacity = opacity
-        self._data_type = data_type  # TODO use _data_type instead!
         self._colorrange = colorrange
         self._colormap = colormap
 
@@ -173,20 +175,25 @@ class MapPlot:
 
         for trace in traces:
             kwargs = trace.kwargs
-            opacity = kwargs.get('opacity')
+            data_type = _data_type(kwargs['latitude'], kwargs['longitude'], kwargs['data'])
 
-            plot_types = dict([(0, 'points'), (1, 'swath'), (2, 'grid')])
-            plot_type = None
-            if(self._data_type is not None):
-                plot_type = plot_types[self._data_type]
+            opacity = kwargs.get('opacity')
+            if opacity is None:
+                if self._opacity is not None:
+                    opacity = self._opacity
+
+            colorrange = kwargs.get('colorrange')
+            if colorrange is None:
+                if self._colorrange is not None:
+                    colorrange = self._colorrange
 
             featureGlWrapper = IpyleafletGlVectorLayerWrapper()
             args = {
                 "lat": kwargs['latitude'],
                 "lon": kwargs['longitude'],
                 "data": kwargs['data'],
-                "colorrange": list(self._colorrange) if self._colorrange else None,
-                "plot_type": plot_type,
+                "colorrange": list(colorrange) if colorrange is not None else None,
+                "plot_type": ['points', 'swath', 'grid'][data_type],  # TODO use names everywhere
                 "pointsize": self._pointsize,
                 "opacity": opacity if opacity is not None else self._opacity,
                 "colormap": self._colormap
@@ -197,6 +204,8 @@ class MapPlot:
 
             self._traces.append(trace)
 
+        return self
+
     def _ipython_display_(self):
         pn.extension(sizing_mode='stretch_width')
         display(pn.pane.ipywidget.IPyLeaflet(self._map))
@@ -206,7 +215,7 @@ class MapPlot3D:
     """3D Map Plot type
     """
 
-    # TODO pointsize, colormap, colorrange.. settable per-trace
+    # TODO pointsize, colormap, colorrange.. settable per-trace.. or even only per-trace?
     def __init__(self, showcolorbar=True, colorrange=None, size=(640, 480),
                  centerlon=0, centerlat=0, opacity=0.6, pointsize=None,
                  heightfactor=None, zoom=None, colormap=None, **kwargs):
@@ -281,6 +290,8 @@ class MapPlot3D:
                 self._renderer.AddActor(colorbar_actor)
 
             self._traces.append(trace)
+
+        return self
 
     def data_actor(self, latitude, longitude, data, lut, heightfactor, opacity):
         data_type = _data_type(latitude, longitude, data)
