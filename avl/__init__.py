@@ -669,7 +669,7 @@ def geo_data(product, value, **kwargs):
     return _mapplot_data(product, value)
 
 
-def Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6,
+def Geo(product, value, colormap='viridis', colormaps=None, colorrange=None, opacity=0.6,
         pointsize=2, **kwargs):
     """
     Return a Geo data trace for the given Harp variable.
@@ -680,13 +680,14 @@ def Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6,
     product -- Harp product
     value -- Harp variable name
     colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+    colormaps -- List of colormaps (matplotlib) or list of (x,r,g,b,a) values (0..1)
     colorrange -- Color range to use (default min, max of data)
     opacity -- Opacity (default 0.6)
     pointsize -- Point size (for point data)
 
     """
     data = geo_data(product, value)
-    return vis.Geo(colormap=colormap, colorrange=colorrange, opacity=opacity,
+    return vis.Geo(colormap=colormap, colormaps=colormaps, colorrange=colorrange, opacity=opacity,
                    pointsize=pointsize, **data, **kwargs)
 
 
