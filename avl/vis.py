@@ -5,7 +5,7 @@ import os
 from IPython.display import display
 from ipywidgets import Layout
 import ipyleaflet
-import matplotlib  # TODO access colormaps differently? use separate project?
+import matplotlib
 import cmcrameri
 import numpy as np
 import panel as pn
@@ -133,11 +133,13 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1, **kwargs):
+    def __init__(self, centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1,
+                 colormaps=None, **kwargs):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
+        colormaps -- List of colormaps (matplotlib) or (x,r,g,b,a) values (0..1)
         size -- Plot size in pixels (default (640, 480))
         zoom -- Zoom factor
 
@@ -145,6 +147,9 @@ class MapPlot:
         layout = Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px')
         self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom,
                                    scroll_wheel_zoom=True, layout=layout)
+        self.wrapper = IpyleafletGlVectorLayerWrapper(colormaps=colormaps)
+        self._map.add_layer(self.wrapper)
+
         self._traces = []
 
     def getMap(self):
@@ -166,10 +171,7 @@ class MapPlot:
         for trace in traces:
             kwargs = trace.kwargs
             data_type = _data_type(kwargs['latitude'], kwargs['longitude'], kwargs['data'])
-            opacity = kwargs['opacity']
             colorrange = kwargs['colorrange']
-
-            featureGlWrapper = IpyleafletGlVectorLayerWrapper()
             args = {
                 "lat": kwargs['latitude'],
                 "lon": kwargs['longitude'],
@@ -178,12 +180,10 @@ class MapPlot:
                 "plot_type": ['points', 'swath', 'grid'][data_type],  # TODO use names everywhere
                 "pointsize": kwargs['pointsize'],
                 "opacity": kwargs['opacity'],
-                "colormap": kwargs['colormap'],
+                "colormap": kwargs['colormap']
             }
             featureGlLayer = IpyleafletGlVectorLayer(**args)
-            self._map.add_layer(featureGlWrapper)
-            featureGlWrapper.add_layer(featureGlLayer)
-
+            self.wrapper.add_layer(featureGlLayer)
             self._traces.append(trace)
 
         return self
@@ -528,7 +528,6 @@ def Geo(latitude, longitude, data=None, **kwargs):
     longitude = np.asarray(longitude)
     if data is not None:
         data = np.asarray(data)
-
     mapplot = MapPlot(**kwargs)
     mapplot.add(Trace(
         'geo',
