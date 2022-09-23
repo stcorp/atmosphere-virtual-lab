@@ -172,6 +172,10 @@ class MapPlot:
             kwargs = trace.kwargs
             data_type = _data_type(kwargs['latitude'], kwargs['longitude'], kwargs['data'])
             colorrange = kwargs['colorrange']
+
+            cmap = _resolve_colormap(kwargs['colormap'])
+            colormap = [(i * 1. / 255,) + tuple(cmap.colors[i]) + (1,) for i in range(256)]  # TODO configurable
+
             args = {
                 "lat": kwargs['latitude'],
                 "lon": kwargs['longitude'],
@@ -180,7 +184,7 @@ class MapPlot:
                 "plot_type": ['points', 'swath', 'grid'][data_type],  # TODO use names everywhere
                 "pointsize": kwargs['pointsize'],
                 "opacity": kwargs['opacity'],
-                "colormap": kwargs['colormap']
+                "colormap": colormap,
             }
             featureGlLayer = IpyleafletGlVectorLayer(**args)
             self.wrapper.add_layer(featureGlLayer)
