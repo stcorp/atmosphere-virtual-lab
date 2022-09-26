@@ -173,8 +173,10 @@ class MapPlot:
             data_type = _data_type(kwargs['latitude'], kwargs['longitude'], kwargs['data'])
             colorrange = kwargs['colorrange']
 
-            cmap = _resolve_colormap(kwargs['colormap'])
-            colormap = [(i * 1. / 255,) + tuple(cmap.colors[i]) + (1,) for i in range(256)]  # TODO configurable
+            colormap = kwargs['colormap']
+            if isinstance(colormap, str):
+                cmap = _resolve_colormap(colormap)
+                colormap = [(i * 1. / 255,) + tuple(cmap.colors[i]) + (1,) for i in range(256)]  # TODO configurable
 
             args = {
                 "lat": kwargs['latitude'],
