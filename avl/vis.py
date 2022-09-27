@@ -180,8 +180,10 @@ class MapPlot:
             data_type = _data_type(kwargs['latitude'], kwargs['longitude'], kwargs['data'])
             colorrange = kwargs['colorrange']
 
-            cmap = _resolve_colormap(kwargs['colormap'])
-            colormap = _create_gradient_edgepoints(cmap)  # TODO configurable
+            colormap = kwargs['colormap']
+            if isinstance(colormap, str):
+                cmap = _resolve_colormap(colormap)
+                colormap = _create_gradient_edgepoints(cmap)  # TODO configurable
 
             args = {
                 "lat": kwargs['latitude'],
