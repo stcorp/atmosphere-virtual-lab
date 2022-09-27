@@ -70,6 +70,9 @@ def _check_colormap(colormap):
     elif colormap is not None:
         raise Exception('unsupported type of colormap')
 
+def _create_gradient_edgepoints(colormap):
+    return [(i * 1. / 255,) + tuple(colormap.colors[i]) + (1,) for i in range(256)]
+
 
 def _resolve_colormap(colormap):
     if colormap is None:
@@ -147,7 +150,11 @@ class MapPlot:
         layout = Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px')
         self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom,
                                    scroll_wheel_zoom=True, layout=layout)
-        self.wrapper = IpyleafletGlVectorLayerWrapper(colormaps=colormaps)
+        cmaps = colormaps
+        if(colormaps is not None and len(colormaps) > 0 and isinstance(colormaps[0], str)):
+            cmaps = [_resolve_colormap(cmap) for cmap in colormaps]
+            cmaps = [_create_gradient_edgepoints(cmap) for cmap in cmaps]
+        self.wrapper = IpyleafletGlVectorLayerWrapper(colormaps=cmaps)
         self._map.add_layer(self.wrapper)
 
         self._traces = []
@@ -174,7 +181,7 @@ class MapPlot:
             colorrange = kwargs['colorrange']
 
             cmap = _resolve_colormap(kwargs['colormap'])
-            colormap = [(i * 1. / 255,) + tuple(cmap.colors[i]) + (1,) for i in range(256)]  # TODO configurable
+            colormap = _create_gradient_edgepoints(cmap)  # TODO configurable
 
             args = {
                 "lat": kwargs['latitude'],
