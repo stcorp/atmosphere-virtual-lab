@@ -139,7 +139,10 @@ class MapPlot:
         Arguments:
         centerlon -- Center longitude (default 0)
         centerlat -- Center latitude (default 0)
-        colormaps -- List of colormaps (matplotlib) or (x,r,g,b,a) values (0..1)
+        colormaps -- List of colormaps to use, with each in one of three forms:
+                     - Name of matplotlib colormap
+                     - List of [(x,r,g,b,a), ..] values (0..1)
+                     - A tuple with ('name', [(x,r,g,b,a), ..]) values
         size -- Plot size in pixels (default (640, 480))
         zoom -- Zoom factor
 
