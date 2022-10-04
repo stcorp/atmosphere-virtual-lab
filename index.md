@@ -1,4 +1,5 @@
-<a name="avl"></a>
+<a id="avl"></a>
+
 # avl
 
 Atmosphere Virtual Lab
@@ -147,7 +148,8 @@ Compatible plot type: `Plot`
 
 - `product` - Harp product
 - `value` - Harp variable name
-- `colormap` - Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+- `colormap` - Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
+  or (x,r,g,b,a) values (ranging from 0..1)
 - `gap_threshold` - Add gaps when larger (np.timedelta, default 24h)
 
 <a id="avl.Geo"></a>
@@ -155,7 +157,7 @@ Compatible plot type: `Plot`
 #### Geo
 
 ```python
-Geo(product, value, **kwargs)
+Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6, pointsize=2, **kwargs)
 ```
 
 Return a Geo data trace for the given Harp variable.
@@ -166,13 +168,17 @@ Compatible plot type: `MapPlot`
 
 - `product` - Harp product
 - `value` - Harp variable name
+- `colormap` - Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+- `colorrange` - Color range to use (default min, max of data)
+- `opacity` - Opacity (default 0.6)
+- `pointsize` - Point size (for point data)
 
 <a id="avl.Geo3D"></a>
 
 #### Geo3D
 
 ```python
-Geo3D(product, value, **kwargs)
+Geo3D(product, value, colormap='viridis', colorrange=None, heightfactor=None, opacity=0.6, pointsize=None, showcolorbar=True, **kwargs)
 ```
 
 Return a Geo3D data trace for the given Harp variable.
@@ -183,6 +189,13 @@ Compatible plot type: `MapPlot3D`
 
 - `product` - Harp product
 - `value` - Harp variable name
+- `colormap` - Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
+  or (x,r,g,b,a) values (ranging from 0..1)
+- `colorrange` - Color range to use (default min, max of data)
+- `heightfactor` - Scale height
+- `opacity` - Opacity (default 0.6)
+- `pointsize` - Point size
+- `showcolorbar` - Show colorbar (default True)
 
 <a id="avl.vis"></a>
 
@@ -227,17 +240,17 @@ class MapPlot()
 #### \_\_init\_\_
 
 ```python
-__init__(data_type, centerlat=0.0, centerlon=0.0, colorrange=None, opacity=1, pointsize=2, zoom=1, size=(800, 400), colormap=None, **kwargs)
+__init__(centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1, colormaps=None, **kwargs)
 ```
 
 **Arguments**:
 
 - `centerlon` - Center longitude (default 0)
 - `centerlat` - Center latitude (default 0)
-- `colormap` - Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
-- `colorrange` - Color range to use (default min, max of data)
-- `opacity` - Opacity (default 0.6)
-- `pointsize` - Point size
+- `colormaps` - List of colormaps to use, with each in one of three forms:
+  - Name of matplotlib colormap
+  - List of [(x,r,g,b,a), ..] values (0..1)
+  - A tuple with ('name', [(x,r,g,b,a), ..]) values
 - `size` - Plot size in pixels (default (640, 480))
 - `zoom` - Zoom factor
 
@@ -277,12 +290,6 @@ __init__(showcolorbar=True, colorrange=None, size=(640, 480), centerlon=0, cente
 
 - `centerlon` - Center longitude (default 0)
 - `centerlat` - Center latitude (default 0)
-- `colormap` - Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
-- `colorrange` - Color range to use (default min, max of data)
-- `heightfactor` - Scale height
-- `opacity` - Opacity (default 0.6)
-- `pointsize` - Point size
-- `showcolorbar` - Show colorbar (default True)
 - `size` - Plot size in pixels (default (640, 480))
 - `zoom` - Zoom factor
 
