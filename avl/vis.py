@@ -179,7 +179,7 @@ class MapPlot:
             colormap = kwargs['colormap']
             if isinstance(colormap, str):
                 cmap = _resolve_colormap(colormap)
-                colormap = [(i * 1. / 255,) + tuple(cmap.colors[i]) + (1,) for i in range(256)]  # TODO configurable
+                colormap = [cmap(i) for i in np.linspace(0, 1, 256)]  # TODO 256 configurable
 
             args = {
                 "lat": kwargs['latitude'],
@@ -437,7 +437,7 @@ class MapPlot3D:
         else:
             cmap = _resolve_colormap(colormap)
             for i in range(256):
-                lut.SetTableValue(i, *cmap.colors[i])
+                lut.SetTableValue(i, *cmap(i))
 
         # NaN color
         lut.SetNanColor(0.0, 0.0, 0.0, 0.0)
@@ -715,7 +715,7 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
 
     else:
         cmap = _resolve_colormap(colormap)
-        colorscale = [[i * 1. / 255, 'rgb' + str(tuple(cmap.colors[i]))] for i in range(256)]  # TODO configurable
+        colorscale = [[i, 'rgb' + str(tuple(cmap(i)[:3]))] for i in np.linspace(0, 1, 256)]
 
     fig.add(Trace(
         'heatmap',
