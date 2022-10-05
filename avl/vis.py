@@ -150,7 +150,16 @@ class MapPlot:
         layout = Layout(width=str(size[0]) + 'px', height=str(size[1]) + 'px')
         self._map = ipyleaflet.Map(center=[centerlat, centerlon], zoom=zoom,
                                    scroll_wheel_zoom=True, layout=layout)
-        self.wrapper = IpyleafletGlVectorLayerWrapper(colormaps=colormaps)
+        transformedColormaps = []
+        if colormaps is not None:
+            for colormap in colormaps:
+                if isinstance(colormap, str):
+                    transformedColormap = _resolve_colormap(colormap)
+                    transformedColormap = [transformedColormap(i) for i in np.linspace(0, 1, 256)] #TODO configurable
+                else:
+                    transformedColormap = colormap
+                transformedColormaps.append(transformedColormap)
+        self.wrapper = IpyleafletGlVectorLayerWrapper(colormaps=transformedColormaps)
         self._map.add_layer(self.wrapper)
 
         self._traces = []
