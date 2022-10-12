@@ -115,7 +115,7 @@ class Plot:  # TODO
 
         for trace in traces:
             if trace.type_ == 'scatter':
-                self._fig.add_trace(go.Scatter(**trace.kwargs))
+                self._fig.add_trace(go.Scattergl(**trace.kwargs))
             elif trace.type_ == 'heatmap':
                 self._fig.add_trace(go.Heatmap(**trace.kwargs))
             elif trace.type_ == 'histogram':
