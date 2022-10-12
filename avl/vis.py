@@ -115,6 +115,8 @@ class Plot:  # TODO
 
         for trace in traces:
             if trace.type_ == 'scatter':
+                self._fig.add_trace(go.Scatter(**trace.kwargs))
+            elif trace.type_ == 'scattergl':
                 self._fig.add_trace(go.Scattergl(**trace.kwargs))
             elif trace.type_ == 'heatmap':
                 self._fig.add_trace(go.Heatmap(**trace.kwargs))
@@ -605,7 +607,7 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             mode = 'markers'
 
     fig.add(Trace(
-        'scatter',
+        'scattergl',
         x=xdata,
         y=ydata,
         error_y=error_y,
@@ -613,7 +615,7 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
         showlegend=False,
     ))
 
-    if xerror is not None:  # TODO y
+    if xerror is not None:  # TODO y, scattergl broken for fillcolor?
         fig.add(Trace(
             'scatter',
             x=xdata - xerror,
