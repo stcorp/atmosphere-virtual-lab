@@ -122,6 +122,8 @@ class Plot:  # TODO
                 self._fig.add_trace(go.Heatmap(**trace.kwargs))
             elif trace.type_ == 'histogram':
                 self._fig.add_trace(go.Histogram(**trace.kwargs))
+            elif trace.type_ == 'bar':
+                self._fig.add_trace(go.Bar(**trace.kwargs))
             self._traces.append(trace)
 
         return self
@@ -657,6 +659,44 @@ def Histogram(data, bins=None, **kwargs):
         nbinsx=bins * 2 if bins else None,  # TODO why *2 needed
         name=kwargs['title'],
         opacity=0.6
+    ))
+
+    return fig
+
+
+def Curtain(xdata, ydata, data, **kwargs):  # TODO actually more like a general rect plot..
+    x = []
+    y = []
+    width = []
+    base = []
+    z = []
+
+    layout = None  # TODO
+    fig = Plot(layout)
+
+    for i in range(xdata.shape[0]):
+        for j in range(xdata.shape[1]):
+            x1, x2 = xdata[i][j]
+            y1, y2 = ydata[i][j]
+            if np.isnan(y1) or np.isnan(y2) or np.isnan(data[i][j]):
+                continue
+            x.append(x1)
+            width.append((x2-x1).item().total_seconds()*1000)
+            base.append(y1)
+            y.append(y2-y1)
+            z.append(data[i][j])
+
+    fig.add(Trace(
+        'bar',
+        x=x,
+        y=y,
+        width=width,
+        base=base,
+        marker_color=z,
+        marker_cmin=min(z), marker_cmax=max(z),
+        marker_colorscale='Viridis',
+        marker_showscale=True,
+        marker_line_width=0,
     ))
 
     return fig

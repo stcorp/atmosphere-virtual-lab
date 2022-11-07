@@ -50,6 +50,7 @@ The following types of data traces are currently supported:
 - Line
 - Histogram
 - Heatmap
+- Curtain
 - Geo
 - Geo3D
 - Volume
@@ -647,6 +648,35 @@ def heatmap_data(product, value, **kwargs):
     return data
 
 
+def curtain_data(product, value, **kwargs):
+    # get data from product
+    x_start = product.datetime_start.data  # TODO handle other structures/dimensions.. see/merge with _plot_data?
+    x_stop = product.datetime_stop.data
+    y = product.altitude_bounds.data
+    data = product[value].data
+
+    # change x_start/stop to datetime
+    offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
+
+    xdata_start = np.empty(x_start.size, dtype='datetime64[s]')  # TODO ns?
+    xdata_start[:] = x_start + offset
+
+    xdata_stop = np.empty(x_stop.size, dtype='datetime64[s]')  # TODO ns?
+    xdata_stop[:] = x_stop + offset
+
+    # make x same shape as y (more flexible)  # TODO faster/nicer
+    x = np.column_stack([xdata_start, xdata_stop])
+    x = x.reshape((x.shape[0], 1, x.shape[1]))
+    x = x.repeat(y.shape[1], 1)
+
+    # return results
+    return {
+        'xdata': x,
+        'ydata': y,
+        'data': data,
+    }
+
+
 def Heatmap(product, value, **kwargs):
     """
     Return a Heatmap data trace for the given Harp variable.
@@ -664,6 +694,19 @@ def Heatmap(product, value, **kwargs):
     data = heatmap_data(product, value)
     return vis.Heatmap(**data, **kwargs)
 
+def Curtain(product, value, **kwargs):
+    """
+    Return a Curtain data trace for the given Harp variable.
+
+    Compatible plot type: `Plot`
+
+    Arguments:
+    product -- Harp product
+    value -- Harp variable name
+
+    """
+    data = curtain_data(product, value)
+    return vis.Curtain(**data, **kwargs)
 
 def geo_data(product, value, **kwargs):
     return _mapplot_data(product, value)
