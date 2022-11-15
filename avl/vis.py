@@ -664,14 +664,19 @@ def Histogram(data, bins=None, **kwargs):
     return fig
 
 
-def Curtain(xdata, ydata, data, **kwargs):  # TODO actually more like a general rect plot..
+def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, **kwargs):  # TODO actually more like a general rect plot..
     x = []
     y = []
     width = []
     base = []
     z = []
 
-    layout = None  # TODO
+    layout = {
+        'title': title,
+        'yaxis': {
+            'title': ylabel,
+        },
+    }
     fig = Plot(layout)
 
     for i in range(xdata.shape[0]):
@@ -697,6 +702,7 @@ def Curtain(xdata, ydata, data, **kwargs):  # TODO actually more like a general 
         marker_colorscale='Viridis',
         marker_showscale=True,
         marker_line_width=0,
+        marker_colorbar={'title': colorlabel},
     ))
 
     return fig

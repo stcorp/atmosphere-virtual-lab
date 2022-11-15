@@ -653,7 +653,10 @@ def curtain_data(product, value, **kwargs):
     x_start = product.datetime_start.data  # TODO handle other structures/dimensions.. see/merge with _plot_data?
     x_stop = product.datetime_stop.data
     y = product.altitude_bounds.data
+    ylabel = 'altitude (%s)' % product.altitude_bounds.unit
     data = product[value].data
+    colorlabel = product[value].unit
+    title = product[value].description or value.replace('_', ' ')
 
     # change x_start/stop to datetime
     offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
@@ -671,9 +674,12 @@ def curtain_data(product, value, **kwargs):
 
     # return results
     return {
+        'title': title,
         'xdata': x,
         'ydata': y,
         'data': data,
+        'ylabel': ylabel,
+        'colorlabel': colorlabel,
     }
 
 
