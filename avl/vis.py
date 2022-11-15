@@ -697,6 +697,7 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
 
     layout = {
         'title': title,
+        'title_x': 0.5,
         'yaxis': {
             'title': ylabel,
         },
