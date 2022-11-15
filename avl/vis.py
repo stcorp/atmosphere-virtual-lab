@@ -664,7 +664,31 @@ def Histogram(data, bins=None, **kwargs):
     return fig
 
 
-def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, **kwargs):  # TODO actually more like a general rect plot..
+def _plotly_colorscale(colormap):
+    if isinstance(colormap, list):
+        if len(colormap[0]) in (3, 4):
+            colorspace = zip(np.linspace(0, 1, len(colormap)), colormap)
+
+            # (r,g,b)
+            if len(colormap[0]) == 3:
+                colormap = [(x,) + color + (1.0,) for x, color in colorspace]
+
+            # (r,g,b,a)
+            else:
+                colormap = [(x,) + color for x, color in colorspace]
+
+        colorscale = [(x, 'rgb' + str((255 * r, 255 * g, 255 * b, a))) for (x, r, g, b, a) in colormap]
+
+    else:
+        cmap = _resolve_colormap(colormap)
+        colorscale = [[i, 'rgb' + str(tuple(cmap(i)[:3]))] for i in np.linspace(0, 1, 256)]
+
+    return colorscale
+
+def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
+            colormap=None, **kwargs):  # TODO actually more like a general rect plot..
+    _check_colormap(colormap)
+
     x = []
     y = []
     width = []
@@ -691,6 +715,8 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, **kwar
             y.append(y2-y1)
             z.append(data[i][j])
 
+    colorscale = _plotly_colorscale(colormap)
+
     fig.add(Trace(
         'bar',
         x=x,
@@ -699,10 +725,10 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, **kwar
         base=base,
         marker_color=z,
         marker_cmin=min(z), marker_cmax=max(z),
-        marker_colorscale='Viridis',
         marker_showscale=True,
         marker_line_width=0,
         marker_colorbar={'title': colorlabel},
+        marker_colorscale=colorscale,
     ))
 
     return fig
@@ -756,23 +782,7 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
     data = np.array(xdata_new)
     xcoords = xcoords_new
 
-    if isinstance(colormap, list):
-        if len(colormap[0]) in (3, 4):
-            colorspace = zip(np.linspace(0, 1, len(colormap)), colormap)
-
-            # (r,g,b)
-            if len(colormap[0]) == 3:
-                colormap = [(x,) + color + (1.0,) for x, color in colorspace]
-
-            # (r,g,b,a)
-            else:
-                colormap = [(x,) + color for x, color in colorspace]
-
-        colorscale = [(x, 'rgb' + str((255 * r, 255 * g, 255 * b, a))) for (x, r, g, b, a) in colormap]
-
-    else:
-        cmap = _resolve_colormap(colormap)
-        colorscale = [[i, 'rgb' + str(tuple(cmap(i)[:3]))] for i in np.linspace(0, 1, 256)]
+    colorscale = _plotly_colorscale(colormap)
 
     fig.add(Trace(
         'heatmap',
