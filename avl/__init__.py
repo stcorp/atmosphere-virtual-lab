@@ -653,6 +653,20 @@ def heatmap_data(product, value, **kwargs): # TODO disentangle from _plot_data?
     return data
 
 
+def _calc_bounds(a):
+    # calculate center points (z(i)+z(i+1))/2
+    centers = (a[:, 1:] + a[:, :-1])/2
+
+    # extrapolate and add outer boundaries
+    lower_bound = ((3*a[:,0])-a[:,1])/2
+    upper_bound = ((3*a[:,-1])-a[:,-2])/2
+
+    lower = np.insert(centers, 0, lower_bound, 1)
+    upper = np.insert(centers, centers.shape[1], upper_bound, 1)
+
+    # stack to create new [lower, upper] dimension
+    return np.stack([lower, upper], axis=2)
+
 def curtain_data(product, value=None, **kwargs):
     value = _get_product_value(product, value, dims=(2,))
     data = product[value].data
@@ -696,9 +710,15 @@ def curtain_data(product, value=None, **kwargs):
                     invert_yaxis = True
                 break
         else:
-            pass  # TODO check altitude, etc..
-#            if val == 'pressure':
-#                invert_yaxis = True
+            for val in ('altitude', 'pressure', 'geopotential_height'):
+                if val in product_values:
+                    y = _calc_bounds(product[val].data)
+                    ylabel = '%s (%s)' % (val, product[val].unit)
+                    if val == 'pressure':
+                        invert_yaxis = True
+                    break
+            else:
+                raise ValueError('cannot determine vertical boundaries')
 
     # derive bounds for 'spectral' dimension
     else: # spectral
@@ -708,7 +728,13 @@ def curtain_data(product, value=None, **kwargs):
                 ylabel = '%s (%s)' % (val[:-7], product[val].unit)
                 break
         else:
-            pass # TODO check wavelength, etc..
+            for val in ('wavelength', 'wavenumber', 'frequency'):
+                if val in product_values:
+                    y = _calc_bounds(product[val].data)
+                    ylabel = '%s (%s)' % (val, product[val].unit)
+                    break
+            else:
+                raise ValueError('cannot determine spectral boundaries')
 
     # change x_start/stop to datetime
     offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
