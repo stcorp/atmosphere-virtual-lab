@@ -658,6 +658,8 @@ def curtain_data(product, value=None, **kwargs):
     data = product[value].data
     dimensions = product[value].dimension
     product_values = list(product)
+    colorlabel = product[value].unit
+    title = product[value].description or value.replace('_', ' ')
     invert_yaxis = False
 
     # derive datetime_start
@@ -684,11 +686,12 @@ def curtain_data(product, value=None, **kwargs):
     else:
         raise ValueError('cannot determine time boundaries') # TODO interpolate as for bounds below?
 
-    # vertical boundaries
+    # derive bounds for 'vertical' dimension
     if dimensions[1] == 'vertical':
         for val in ('altitude_bounds', 'pressure_bounds', 'geopotential_height_bounds'):
             if val in product_values:
                 y = product[val].data
+                ylabel = '%s (%s)' % (val[:-7], product[val].unit)
                 if val == 'pressure_bounds':
                     invert_yaxis = True
                 break
@@ -697,18 +700,15 @@ def curtain_data(product, value=None, **kwargs):
 #            if val == 'pressure':
 #                invert_yaxis = True
 
+    # derive bounds for 'spectral' dimension
     else: # spectral
         for val in ('wavelength_bounds', 'wavenumber_bounds', 'frequency_bounds'):
             if val in product_values:
                 y = product[val].data
+                ylabel = '%s (%s)' % (val[:-7], product[val].unit)
                 break
         else:
             pass # TODO check wavelength, etc..
-
-    # labels
-    ylabel = 'altitude (%s)' % product.altitude_bounds.unit
-    colorlabel = product[value].unit
-    title = product[value].description or value.replace('_', ' ')
 
     # change x_start/stop to datetime
     offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
