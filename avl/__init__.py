@@ -660,9 +660,29 @@ def curtain_data(product, value=None, **kwargs):
     product_values = list(product)
     invert_yaxis = False
 
-    # time boundaries
-    x_start = product.datetime_start.data
-    x_stop = product.datetime_stop.data
+    # derive datetime_start
+    if 'datetime_start' in product_values:
+        x_start = product.datetime_start.data
+    elif 'datetime_stop' in product_values and 'datetime' in product_values:
+        x_start = product.datetime.data - (product.datetime_stop.data - product.datetime.data)
+    elif 'datetime_stop' in product_values and 'datetime_length' in product_values:
+        x_start = product.datetime_stop.data - product.datetime_length.data
+    elif 'datetime' in product_values and 'datetime_length' in product_values:
+        x_start = product.datetime.data - (product.datetime_length.data / 2)
+    else:
+        raise ValueError('cannot determine time boundaries') # TODO interpolate as for bounds below?
+
+    # derive datetime_stop
+    if 'datetime_stop' in product_values:
+        x_stop = product.datetime_stop.data
+    elif 'datetime_start' in product_values and 'datetime' in product_values:
+        x_stop = product.datetime.data + (product.datetime.data - product.datetime_start.data)
+    elif 'datetime_start' in product_values and 'datetime_length' in product_values:
+        x_stop = product.datetime_start.data + product.datetime_length.data
+    elif 'datetime' in product_values and 'datetime_length' in product_values:
+        x_stop = product.datetime.data + (product.datetime_length.data / 2)
+    else:
+        raise ValueError('cannot determine time boundaries') # TODO interpolate as for bounds below?
 
     # vertical boundaries
     if dimensions[1] == 'vertical':
