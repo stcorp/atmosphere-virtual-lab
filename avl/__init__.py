@@ -177,7 +177,7 @@ def _get_midpoint_axis_from_bounds(bounds_variable, log=False):
     return harp.Variable(data, bounds_variable.dimension[:-1], bounds_variable.unit)
 
 
-def _plot_data(product, value=None, average=False):
+def _get_product_value(product, value):
     if not isinstance(product, harp.Product):
         raise TypeError("Expecting a HARP product")
 
@@ -208,6 +208,11 @@ def _plot_data(product, value=None, average=False):
     if value is None:
         raise ValueError("HARP product is not plotable")
 
+    return value
+
+
+def _plot_data(product, value=None, average=False):
+    value = _get_product_value(product, value)
     xdata = None
     ydata = product[value]
     attr = {}
@@ -648,7 +653,9 @@ def heatmap_data(product, value, **kwargs):
     return data
 
 
-def curtain_data(product, value, **kwargs):
+def curtain_data(product, value=None, **kwargs):
+    value = _get_product_value(product, value)
+
     # get data from product
     x_start = product.datetime_start.data  # TODO handle other structures/dimensions.. see/merge with _plot_data?
     x_stop = product.datetime_stop.data
