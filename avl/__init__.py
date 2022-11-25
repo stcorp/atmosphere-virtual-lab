@@ -123,17 +123,6 @@ class _objdict(dict):
             raise AttributeError("No such attribute: " + name)
 
 
-def _get_prefered_value(values, unprefered_patterns=_UNPREFERED_PATTERNS):
-    if unprefered_patterns:
-        non_matching = [v for v in values if not re.match(unprefered_patterns[0], v)]
-        value = _get_prefered_value(non_matching, unprefered_patterns[1:])
-        if value is not None:
-            return value
-    if values:
-        return values[0]
-    return None
-
-
 def _get_attributes(product):
     # we return all scalars and 1D (time dependent) variables
     def attr_value(value, variable):
@@ -177,14 +166,25 @@ def _get_midpoint_axis_from_bounds(bounds_variable, log=False):
     return harp.Variable(data, bounds_variable.dimension[:-1], bounds_variable.unit)
 
 
-def _get_product_value(product, value):
+def _get_prefered_value(values, unprefered_patterns=_UNPREFERED_PATTERNS):
+    if unprefered_patterns:
+        non_matching = [v for v in values if not re.match(unprefered_patterns[0], v)]
+        value = _get_prefered_value(non_matching, unprefered_patterns[1:])
+        if value is not None:
+            return value
+    if values:
+        return values[0]
+    return None
+
+
+def _get_product_value(product, value, dims=(1, 2)):
     if not isinstance(product, harp.Product):
         raise TypeError("Expecting a HARP product")
 
     variable_names = []
 
     for name in list(product):
-        if len(product[name].dimension) == 0 or len(product[name].dimension) > 2:
+        if len(product[name].dimension) not in dims:
             continue
         if not isinstance(product[name].data, (np.ndarray, np.generic)):
             continue
@@ -654,14 +654,14 @@ def heatmap_data(product, value, **kwargs):
 
 
 def curtain_data(product, value=None, **kwargs):
-    value = _get_product_value(product, value)
+    value = _get_product_value(product, value, dims=(2,))
 
     # get data from product
+    data = product[value].data
     x_start = product.datetime_start.data  # TODO handle other structures/dimensions.. see/merge with _plot_data?
     x_stop = product.datetime_stop.data
     y = product.altitude_bounds.data
     ylabel = 'altitude (%s)' % product.altitude_bounds.unit
-    data = product[value].data
     colorlabel = product[value].unit
     title = product[value].description or value.replace('_', ' ')
 
