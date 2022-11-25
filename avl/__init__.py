@@ -644,7 +644,7 @@ def Line(product, value, **kwargs):
     return vis.Line(**data, **kwargs)
 
 
-def heatmap_data(product, value, **kwargs):
+def heatmap_data(product, value, **kwargs): # TODO disentangle from _plot_data?
     data = _plot_data(product, value)
 
     data['data'] = data['xdata']
@@ -655,12 +655,37 @@ def heatmap_data(product, value, **kwargs):
 
 def curtain_data(product, value=None, **kwargs):
     value = _get_product_value(product, value, dims=(2,))
-
-    # get data from product
     data = product[value].data
-    x_start = product.datetime_start.data  # TODO handle other structures/dimensions.. see/merge with _plot_data?
+    dimensions = product[value].dimension
+    product_values = list(product)
+    invert_yaxis = False
+
+    # time boundaries
+    x_start = product.datetime_start.data
     x_stop = product.datetime_stop.data
-    y = product.altitude_bounds.data
+
+    # vertical boundaries
+    if dimensions[1] == 'vertical':
+        for val in ('altitude_bounds', 'pressure_bounds', 'geopotential_height_bounds'):
+            if val in product_values:
+                y = product[val].data
+                if val == 'pressure_bounds':
+                    invert_yaxis = True
+                break
+        else:
+            pass  # TODO check altitude, etc..
+#            if val == 'pressure':
+#                invert_yaxis = True
+
+    else: # spectral
+        for val in ('wavelength_bounds', 'wavenumber_bounds', 'frequency_bounds'):
+            if val in product_values:
+                y = product[val].data
+                break
+        else:
+            pass # TODO check wavelength, etc..
+
+    # labels
     ylabel = 'altitude (%s)' % product.altitude_bounds.unit
     colorlabel = product[value].unit
     title = product[value].description or value.replace('_', ' ')
@@ -687,6 +712,7 @@ def curtain_data(product, value=None, **kwargs):
         'data': data,
         'ylabel': ylabel,
         'colorlabel': colorlabel,
+        'invert_yaxis': invert_yaxis,
     }
 
 

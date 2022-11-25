@@ -686,7 +686,7 @@ def _plotly_colorscale(colormap):
     return colorscale
 
 def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
-            colormap=None, **kwargs):  # TODO actually more like a general rect plot..
+            colormap=None, invert_yaxis=False, **kwargs):  # TODO actually more like a general rect plot..
     _check_colormap(colormap)
 
     x = []
@@ -702,6 +702,9 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
             'title': ylabel,
         },
     }
+    if invert_yaxis:
+        layout['yaxis']['autorange'] = 'reversed'
+
     fig = Plot(layout)
 
     for i in range(xdata.shape[0]):
