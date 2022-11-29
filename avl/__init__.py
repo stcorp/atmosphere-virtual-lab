@@ -283,27 +283,15 @@ def _plot_data(product, value=None, average=False):
         xlabel = 'time'
         ylabel = 'altitude (km)'
         colorlabel = xunit
-
-        xdata_dt = np.empty(len(product.datetime.data), dtype='datetime64[s]')  # TODO ns?
-        offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
-        xdata_dt[:] = (product.datetime.data * 24 * 60 * 60) + offset
-
+        xdata_dt = _get_timestamps(product.datetime.data, product.datetime.unit)
         coords = (xdata_dt, product.altitude.data)
 
     xdata = xdata.data
     ydata = ydata.data
 
     if xunit is not None:
-        if xunit == 'seconds since 2010-01-01':  # TODO generalize (start of epoch.. more formats?)
-            xdata_dt = np.empty(len(xdata), dtype='datetime64[s]')  # TODO ns?
-            offset = (datetime(2010, 1, 1) - datetime(1970, 1, 1)).total_seconds()
-            xdata_dt[:] = xdata + offset
-            xdata = xdata_dt
-        if xunit == 'days since 2000-01-01':
-            xdata_dt = np.empty(len(product.datetime.data), dtype='datetime64[s]')  # TODO ns?
-            offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
-            xdata_dt[:] = (product.datetime.data * 24 * 60 * 60) + offset
-            xdata = xdata_dt
+        if " since " in xunit:  # TODO check dimension instead
+            xdata = _get_timestamps(xdata, xunit)
         elif xlabel is None:
             xlabel = xunit
 
@@ -679,6 +667,7 @@ def _get_timestamps(values, unit):
 
     xdata_dt = np.empty(len(values), dtype='datetime64[s]')
 
+    # TODO avoid dep on coda
     formats = ("yyyy-MM-dd HH:mm:ss.SSSSSS|"
                "yyyy-MM-dd HH:mm:ss|"
                "yyyy-MM-dd")
