@@ -58,9 +58,9 @@ The following types of data traces are currently supported:
 There are three types of plots that can also be individually instantiated, and
 populated with (compatible) data traces:
 
-- Plot
-- MapPlot
-- MapPlot3D
+- Plot (Histogram, Scatter, Line, Heatmap and Curtain)
+- MapPlot (Geo)
+- MapPlot3D (Geo3D)
 
 Data traces are in themselves also plots (with a single data trace), so
 can be shown interactively without requiring a separate plot.
@@ -737,7 +737,7 @@ def curtain_data(product, value=None, **kwargs):
                 raise ValueError('cannot determine spectral boundaries')
 
     # change x_start/stop to datetime
-    offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
+    offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds() # TODO check unit, and make reusable conversion
 
     xdata_start = np.empty(x_start.size, dtype='datetime64[s]')  # TODO ns?
     xdata_start[:] = x_start + offset
