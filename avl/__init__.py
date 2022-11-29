@@ -667,6 +667,31 @@ def _calc_bounds(a):
     # stack to create new [lower, upper] dimension
     return np.stack([lower, upper], axis=2)
 
+
+def _get_timestamps(values, unit):
+    if " since " not in unit:
+        raise ValueError("unsupported unit: %s" % unit)
+
+    base, epoch = unit.split(" since ")
+
+    if base not in ["s", "seconds", "days"]:
+        raise ValueError("unsupported unit: %s" % unit)
+
+    xdata_dt = np.empty(len(values), dtype='datetime64[s]')
+
+    formats = ("yyyy-MM-dd HH:mm:ss.SSSSSS|"
+               "yyyy-MM-dd HH:mm:ss|"
+               "yyyy-MM-dd")
+    offset = coda.time_string_to_double(formats, epoch) + (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
+
+    if base == "days":
+        xdata_dt[:] = values * 86400 + offset
+    else:
+        xdata_dt[:] = values + offset
+
+    return xdata_dt
+
+
 def curtain_data(product, value=None, **kwargs):
     value = _get_product_value(product, value, dims=(2,))
     data = product[value].data
@@ -679,12 +704,16 @@ def curtain_data(product, value=None, **kwargs):
     # derive datetime_start
     if 'datetime_start' in product_values:
         x_start = product.datetime_start.data
+        x_unit = product.datetime_start.unit
     elif 'datetime_stop' in product_values and 'datetime' in product_values:
         x_start = product.datetime.data - (product.datetime_stop.data - product.datetime.data)
+        x_unit = product.datetime_stop.unit  # TODO error if units don't match
     elif 'datetime_stop' in product_values and 'datetime_length' in product_values:
         x_start = product.datetime_stop.data - product.datetime_length.data
+        x_unit = product.datetime_stop.unit
     elif 'datetime' in product_values and 'datetime_length' in product_values:
         x_start = product.datetime.data - (product.datetime_length.data / 2)
+        x_unit = product.datetime.unit
     else:
         raise ValueError('cannot determine time boundaries') # TODO interpolate as for bounds below?
 
@@ -736,14 +765,9 @@ def curtain_data(product, value=None, **kwargs):
             else:
                 raise ValueError('cannot determine spectral boundaries')
 
-    # change x_start/stop to datetime
-    offset = (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds() # TODO check unit, and make reusable conversion
-
-    xdata_start = np.empty(x_start.size, dtype='datetime64[s]')  # TODO ns?
-    xdata_start[:] = x_start + offset
-
-    xdata_stop = np.empty(x_stop.size, dtype='datetime64[s]')  # TODO ns?
-    xdata_stop[:] = x_stop + offset
+    # correct time stamps via unit
+    xdata_start = _get_timestamps(x_start, x_unit)
+    xdata_stop = _get_timestamps(x_stop, x_unit)
 
     # make x same shape as y (more flexible)  # TODO faster/nicer
     x = np.column_stack([xdata_start, xdata_stop])
