@@ -211,8 +211,7 @@ class MapPlot:
         return self
 
     def _ipython_display_(self):
-        pn.extension(sizing_mode='stretch_width')
-        display(pn.pane.ipywidget.IPyLeaflet(self._map))
+        display(self._map)
 
 
 class MapPlot3D:
