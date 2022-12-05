@@ -685,7 +685,7 @@ def _plotly_colorscale(colormap):
     return colorscale
 
 
-def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
+def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorrange=None,
             colormap=None, invert_yaxis=False, **kwargs):  # TODO actually more like a general rect plot..
     _check_colormap(colormap)
 
@@ -721,6 +721,11 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
 
     colorscale = _plotly_colorscale(colormap)
 
+    if colorrange is not None:
+        cmin, cmax = colorrange
+    else:
+        cmin, cmax = min(z), max(z)
+
     fig.add(Trace(
         'bar',
         x=x,
@@ -728,7 +733,7 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
         width=width,
         base=base,
         marker_color=z,
-        marker_cmin=min(z), marker_cmax=max(z),
+        marker_cmin=cmin, marker_cmax=cmax,
         marker_showscale=True,
         marker_line_width=0,
         marker_colorbar={'title': colorlabel},
@@ -740,7 +745,7 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
 
 # TODO separate xcoords, ycoords
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
-            colorlabel=None, gap_threshold=None, colormap=None, **kwargs):
+            colorlabel=None, gap_threshold=None, colormap=None, colorrange=None, **kwargs):
     _check_colormap(colormap)
 
     xcoords, ycoords = coords
@@ -788,12 +793,19 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
 
     colorscale = _plotly_colorscale(colormap)
 
+#    if colorrange is not None:
+#        cmin, cmax = colorrange
+#    else:
+#        cmin, cmax = np.nanmin(data), np.nanmax(data)
+
     fig.add(Trace(
         'heatmap',
         z=np.transpose(data),
         x=xcoords,
         y=ycoords,
         colorscale=colorscale,
+#        cmin=cmin,
+#        cmax=cmax,
         colorbar={'title': colorlabel},
     ))
 
