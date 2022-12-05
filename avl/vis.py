@@ -159,7 +159,7 @@ class MapPlot:
             for colormap in colormaps:
                 if isinstance(colormap, str):
                     transformedColormap = _resolve_colormap(colormap)
-                    transformedColormap = [transformedColormap(i) for i in np.linspace(0, 1, 256)] #TODO configurable
+                    transformedColormap = [transformedColormap(i) for i in np.linspace(0, 1, 256)]  # TODO configurable
                 else:
                     transformedColormap = colormap
                 transformedColormaps.append(transformedColormap)
@@ -683,6 +683,7 @@ def _plotly_colorscale(colormap):
         colorscale = [[i, 'rgb' + str(tuple(cmap(i)[:3]))] for i in np.linspace(0, 1, 256)]
 
     return colorscale
+
 
 def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None,
             colormap=None, invert_yaxis=False, **kwargs):  # TODO actually more like a general rect plot..

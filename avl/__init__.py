@@ -632,7 +632,7 @@ def Line(product, value, **kwargs):
     return vis.Line(**data, **kwargs)
 
 
-def heatmap_data(product, value, **kwargs): # TODO disentangle from _plot_data?
+def heatmap_data(product, value, **kwargs):  # TODO disentangle from _plot_data?
     data = _plot_data(product, value)
 
     data['data'] = data['xdata']
@@ -643,11 +643,11 @@ def heatmap_data(product, value, **kwargs): # TODO disentangle from _plot_data?
 
 def _calc_bounds(a):
     # calculate center points (z(i)+z(i+1))/2
-    centers = (a[:, 1:] + a[:, :-1])/2
+    centers = (a[:, 1:] + a[:, :-1]) / 2
 
     # extrapolate and add outer boundaries
-    lower_bound = ((3*a[:,0])-a[:,1])/2
-    upper_bound = ((3*a[:,-1])-a[:,-2])/2
+    lower_bound = ((3 * a[:, 0]) - a[:, 1]) / 2
+    upper_bound = ((3 * a[:, -1]) - a[:, -2]) / 2
 
     lower = np.insert(centers, 0, lower_bound, 1)
     upper = np.insert(centers, centers.shape[1], upper_bound, 1)
@@ -704,7 +704,7 @@ def curtain_data(product, value=None, **kwargs):
         x_start = product.datetime.data - (product.datetime_length.data / 2)
         x_unit = product.datetime.unit
     else:
-        raise ValueError('cannot determine time boundaries') # TODO interpolate as for bounds below?
+        raise ValueError('cannot determine time boundaries')  # TODO interpolate as for bounds below?
 
     # derive datetime_stop
     if 'datetime_stop' in product_values:
@@ -716,7 +716,7 @@ def curtain_data(product, value=None, **kwargs):
     elif 'datetime' in product_values and 'datetime_length' in product_values:
         x_stop = product.datetime.data + (product.datetime_length.data / 2)
     else:
-        raise ValueError('cannot determine time boundaries') # TODO interpolate as for bounds below?
+        raise ValueError('cannot determine time boundaries')  # TODO interpolate as for bounds below?
 
     # derive bounds for 'vertical' dimension
     if dimensions[1] == 'vertical':
@@ -739,7 +739,7 @@ def curtain_data(product, value=None, **kwargs):
                 raise ValueError('cannot determine vertical boundaries')
 
     # derive bounds for 'spectral' dimension
-    else: # spectral
+    else:  # spectral
         for val in ('wavelength_bounds', 'wavenumber_bounds', 'frequency_bounds'):
             if val in product_values:
                 y = product[val].data
@@ -775,7 +775,7 @@ def curtain_data(product, value=None, **kwargs):
     }
 
 
-def Heatmap(product, value, **kwargs):
+def Heatmap(product, value, colormap='viridis', colorrange=None, **kwargs):
     """
     Return a Heatmap data trace for the given Harp variable.
 
@@ -786,13 +786,21 @@ def Heatmap(product, value, **kwargs):
     value -- Harp variable name
     colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
                 or (x,r,g,b,a) values (ranging from 0..1)
+    colorrange -- Color range to use (default min, max of data)
     gap_threshold -- Add gaps when larger (np.timedelta, default 24h)
 
     """
     data = heatmap_data(product, value)
-    return vis.Heatmap(**data, **kwargs)
 
-def Curtain(product, value, **kwargs):
+    return vis.Heatmap(
+        colormap=colormap,
+        colorrange=colorrange,
+        **data,
+        **kwargs
+    )
+
+
+def Curtain(product, value, colormap='viridis', colorrange=None, **kwargs):
     """
     Return a Curtain data trace for the given Harp variable.
 
@@ -803,10 +811,18 @@ def Curtain(product, value, **kwargs):
     value -- Harp variable name
     colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
                 or (x,r,g,b,a) values (ranging from 0..1)
+    colorrange -- Color range to use (default min, max of data)
 
     """
     data = curtain_data(product, value)
-    return vis.Curtain(**data, **kwargs)
+
+    return vis.Curtain(
+        colormap=colormap,
+        colorrange=colorrange,
+        **data,
+        **kwargs
+    )
+
 
 def geo_data(product, value, **kwargs):
     return _mapplot_data(product, value)
@@ -822,15 +838,23 @@ def Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6,
     Arguments:
     product -- Harp product
     value -- Harp variable name
-    colormap -- Colormap name (matplotlib) or list of (x,r,g,b,a) values (0..1)
+    colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
+                or (x,r,g,b,a) values (ranging from 0..1)
     colorrange -- Color range to use (default min, max of data)
     opacity -- Opacity (default 0.6)
     pointsize -- Point size (for point data)
 
     """
     data = geo_data(product, value)
-    return vis.Geo(colormap=colormap, colorrange=colorrange, opacity=opacity,
-                   pointsize=pointsize, **data, **kwargs)
+
+    return vis.Geo(
+        colormap=colormap,
+        colorrange=colorrange,
+        opacity=opacity,
+        pointsize=pointsize,
+        **data,
+        **kwargs
+    )
 
 
 def geo3d_data(product, value, **kwargs):
@@ -857,6 +881,14 @@ def Geo3D(product, value, colormap='viridis', colorrange=None, heightfactor=None
 
     """
     data = geo3d_data(product, value)
-    return vis.Geo3D(colormap=colormap, colorrange=colorrange, heightfactor=heightfactor,
-                     opacity=opacity, pointsize=pointsize, showcolorbar=showcolorbar,
-                     **data, **kwargs)
+
+    return vis.Geo3D(
+        colormap=colormap,
+        colorrange=colorrange,
+        heightfactor=heightfactor,
+        opacity=opacity,
+        pointsize=pointsize,
+        showcolorbar=showcolorbar,
+        **data,
+        **kwargs
+    )
