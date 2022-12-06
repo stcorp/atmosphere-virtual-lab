@@ -15,6 +15,7 @@ The following types of data traces are currently supported:
 - Line
 - Histogram
 - Heatmap
+- Curtain
 - Geo
 - Geo3D
 - Volume
@@ -22,9 +23,9 @@ The following types of data traces are currently supported:
 There are three types of plots that can also be individually instantiated, and
 populated with (compatible) data traces:
 
-- Plot
-- MapPlot
-- MapPlot3D
+- Plot (Histogram, Scatter, Line, Heatmap and Curtain)
+- MapPlot (Geo)
+- MapPlot3D (Geo3D)
 
 Data traces are in themselves also plots (with a single data trace), so
 can be shown interactively without requiring a separate plot.
@@ -49,7 +50,7 @@ Combining data traces:
 #### download
 
 ```python
-download(files, target_directory=".")
+def download(files, target_directory=".")
 ```
 
 Download file(s) from `atmospherevirtuallab.org`, skipping files
@@ -65,7 +66,7 @@ that already exist.
 #### Volume
 
 ```python
-Volume(product, value, **kwargs)
+def Volume(product, value, **kwargs)
 ```
 
 Return a Volume data trace for the given Harp variable.
@@ -85,7 +86,7 @@ Volume data traces cannot currently be combined in a single plot!
 #### Histogram
 
 ```python
-Histogram(product, value, **kwargs)
+def Histogram(product, value, **kwargs)
 ```
 
 Return a Histogram data trace for the given Harp variable.
@@ -103,7 +104,7 @@ Compatible plot type: `Plot`
 #### Scatter
 
 ```python
-Scatter(product, value, **kwargs)
+def Scatter(product, value, **kwargs)
 ```
 
 Return a Scatter data trace for the given Harp variable.
@@ -120,7 +121,7 @@ Compatible plot type: `Plot`
 #### Line
 
 ```python
-Line(product, value, **kwargs)
+def Line(product, value, **kwargs)
 ```
 
 Return a Line data trace for the given Harp variable.
@@ -137,7 +138,7 @@ Compatible plot type: `Plot`
 #### Heatmap
 
 ```python
-Heatmap(product, value, **kwargs)
+def Heatmap(product, value, **kwargs)
 ```
 
 Return a Heatmap data trace for the given Harp variable.
@@ -157,7 +158,7 @@ Compatible plot type: `Plot`
 #### Geo
 
 ```python
-Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6, pointsize=2, **kwargs)
+def Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6, pointsize=2, **kwargs)
 ```
 
 Return a Geo data trace for the given Harp variable.
@@ -178,7 +179,7 @@ Compatible plot type: `MapPlot`
 #### Geo3D
 
 ```python
-Geo3D(product, value, colormap='viridis', colorrange=None, heightfactor=None, opacity=0.6, pointsize=None, showcolorbar=True, **kwargs)
+def Geo3D(product, value, colormap='viridis', colorrange=None, heightfactor=None, opacity=0.6, pointsize=None, showcolorbar=True, **kwargs)
 ```
 
 Return a Geo3D data trace for the given Harp variable.
@@ -216,7 +217,7 @@ class Plot()
 #### add
 
 ```python
-add(obj)
+def add(obj)
 ```
 
 Add data trace of the same plot type.
@@ -240,7 +241,7 @@ class MapPlot()
 #### \_\_init\_\_
 
 ```python
-__init__(centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1, colormaps=None, **kwargs)
+def __init__(centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1, colormaps=None, **kwargs)
 ```
 
 **Arguments**:
@@ -259,7 +260,7 @@ __init__(centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1, colormaps=None, 
 #### add
 
 ```python
-add(obj)
+def add(obj)
 ```
 
 Add data trace of the same plot type.
@@ -283,7 +284,7 @@ class MapPlot3D()
 #### \_\_init\_\_
 
 ```python
-__init__(showcolorbar=True, colorrange=None, size=(640, 480), centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, zoom=None, colormap=None, **kwargs)
+def __init__(showcolorbar=True, colorrange=None, size=(640, 480), centerlon=0, centerlat=0, opacity=0.6, pointsize=None, heightfactor=None, zoom=None, colormap=None, **kwargs)
 ```
 
 **Arguments**:
@@ -298,7 +299,7 @@ __init__(showcolorbar=True, colorrange=None, size=(640, 480), centerlon=0, cente
 #### add
 
 ```python
-add(obj)
+def add(obj)
 ```
 
 Add data trace of the same plot type.
