@@ -274,7 +274,7 @@ class MapPlot3D:
                                          kwargs['opacity'],
                                          kwargs['pointsize'])
 
-            colorbar_actor = self.colorbar_actor(lut)
+            colorbar_actor = self.colorbar_actor(lut, kwargs['colorlabel'])
 
             self._renderer.AddActor(data_actor)
 
@@ -463,8 +463,9 @@ class MapPlot3D:
         lut.Build()
         return lut
 
-    def colorbar_actor(self, lut):
+    def colorbar_actor(self, lut, colorlabel):
         actor = vtk.vtkScalarBarActor()
+        actor.SetTitle(colorlabel)
         actor.SetOrientationToHorizontal()
         actor.SetLookupTable(lut)
 
@@ -544,7 +545,7 @@ class Trace:
         self.kwargs = kwargs
 
 
-def Geo(latitude, longitude, data=None, **kwargs):
+def Geo(latitude, longitude, data=None, colorlabel=None, **kwargs):
     latitude = np.asarray(latitude)
     longitude = np.asarray(longitude)
     if data is not None:
@@ -555,12 +556,13 @@ def Geo(latitude, longitude, data=None, **kwargs):
         latitude=latitude,
         longitude=longitude,
         data=data,
+        colorlabel=colorlabel,
         **kwargs
     ))
     return mapplot
 
 
-def Geo3D(latitude, longitude, data=None, **kwargs):
+def Geo3D(latitude, longitude, data=None, colorlabel=None, **kwargs):
     latitude = np.asarray(latitude)
     longitude = np.asarray(longitude)
     if data is not None:
@@ -572,6 +574,7 @@ def Geo3D(latitude, longitude, data=None, **kwargs):
         latitude=latitude,
         longitude=longitude,
         data=data,
+        colorlabel=colorlabel,
         **kwargs
     ))
     return mapplot3d

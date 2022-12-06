@@ -486,6 +486,7 @@ def _mapplot_data(product, value=None, locationOnly=False):
         'longitude': longitude.data,
         'latitude': latitude.data,
         'data_type': data_type,
+        'colorlabel': prop.get('colorbartitle'),
     })
 
 
