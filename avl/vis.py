@@ -676,11 +676,11 @@ def _plotly_colorscale(colormap):
             else:
                 colormap = [(x,) + color for x, color in colorspace]
 
-        colorscale = [(x, 'rgb' + str((255 * r, 255 * g, 255 * b, a))) for (x, r, g, b, a) in colormap]
+        colorscale = [(x, 'rgb(%.4f, %.4f, %.4f, %.4f)' % (255 * r, 255 * g, 255 * b, a)) for (x, r, g, b, a) in colormap]
 
     else:
         cmap = _resolve_colormap(colormap)
-        colorscale = [[i, 'rgb' + str(tuple(cmap(i)[:3]))] for i in np.linspace(0, 1, 256)]
+        colorscale = [(i, 'rgb(%.4f, %.4f, %.4f)' % tuple(cmap(i)[:3])) for i in np.linspace(0, 1, 256)]
 
     return colorscale
 
