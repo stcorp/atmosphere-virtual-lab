@@ -485,12 +485,12 @@ def _mapplot_data(product, value=None, locationOnly=False):
         'data': data,
         'longitude': longitude.data,
         'latitude': latitude.data,
-        'data_type': data_type,
+#        'data_type': data_type,
         'colorlabel': prop.get('colorbartitle'),
     })
 
 
-def volume_data(product, value, spherical=False, **kwargs):
+def volume_data(product, value, spherical=False):
     if not isinstance(product, harp.Product):
         raise TypeError("Expecting a HARP product")
 
@@ -547,7 +547,7 @@ def volume_data(product, value, spherical=False, **kwargs):
 
 # TODO is 'value' the right name for a Harp variable?
 
-def Volume(product, value, **kwargs):
+def Volume(product, value, spherical=False, **kwargs):
     """
     Return a Volume data trace for the given Harp variable.
 
@@ -561,7 +561,7 @@ def Volume(product, value, **kwargs):
     spherical -- Project data to a sphere (default False)
 
     """
-    data = volume_data(product, value, **kwargs)
+    data = volume_data(product, value, spherical)
     return vis.VolumePlot(**data, **kwargs)
 
 
@@ -574,7 +574,6 @@ def histogram_data(product, value, **kwargs):
     return {
         'data': var.data,
         'title': value.replace('_', ' '),
-        'xlabel': var.unit,
         'ylabel': var.unit,
     }
 
@@ -633,11 +632,14 @@ def Line(product, value, **kwargs):
     return vis.Line(**data, **kwargs)
 
 
-def heatmap_data(product, value, **kwargs):  # TODO disentangle from _plot_data?
+def heatmap_data(product, value, **kwargs):  # TODO disentangle from _plot_data, avoid 'del' below in any case
     data = _plot_data(product, value)
 
     data['data'] = data['xdata']
     del data['xdata']
+    del data['ydata']
+    del data['xerror']
+    del data['yerror']
 
     return data
 
@@ -830,7 +832,7 @@ def geo_data(product, value, **kwargs):
 
 
 def Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6,
-        pointsize=2, **kwargs):
+        pointsize=2, showcolorbar=True, **kwargs):
     """
     Return a Geo data trace for the given Harp variable.
 
@@ -853,6 +855,7 @@ def Geo(product, value, colormap='viridis', colorrange=None, opacity=0.6,
         colorrange=colorrange,
         opacity=opacity,
         pointsize=pointsize,
+        showcolorbar=showcolorbar,
         **data,
         **kwargs
     )

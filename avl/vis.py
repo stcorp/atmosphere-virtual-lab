@@ -90,7 +90,7 @@ class Plot:  # TODO
     """2D Plot type
     """
 
-    def __init__(self, layout=None, **kwargs):  # TODO name individual kwargs
+    def __init__(self, layout=None):
         self._fig = go.Figure()
         self._traces = []
         self._layout = layout
@@ -137,8 +137,7 @@ class MapPlot:
     """2D Map Plot type
     """
 
-    def __init__(self, centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1,
-                 colormaps=None, **kwargs):
+    def __init__(self, centerlat=0.0, centerlon=0.0, size=(800, 400), zoom=1, colormaps=None):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
@@ -218,9 +217,7 @@ class MapPlot3D:
     """3D Map Plot type
     """
 
-    def __init__(self, showcolorbar=True, colorrange=None, size=(640, 480),
-                 centerlon=0, centerlat=0, opacity=0.6, pointsize=None,
-                 heightfactor=None, zoom=None, colormap=None, **kwargs):
+    def __init__(self, size=(640, 480), centerlon=0, centerlat=0, zoom=None):
         """
         Arguments:
         centerlon -- Center longitude (default 0)
@@ -229,8 +226,6 @@ class MapPlot3D:
         zoom -- Zoom factor
 
         """
-        _check_colormap(colormap)
-
         self.size = size
         self.centerlon = centerlon
         self.centerlat = centerlat
@@ -529,7 +524,7 @@ class MapPlot3D:
 
 # TODO add trace? specify physical north..?
 def VolumePlot(data=None, size=(640, 1000), scale=(1, 1, 1),
-               display_slices=True, display_volume=True, **kwargs):
+               display_slices=True, display_volume=True):
     pn.extension(sizing_mode='stretch_width')
     data = np.nan_to_num(data, np.nanmin(data))  # known issue in vtk.js that it doesn't handle nans
     plot = pn.pane.VTKVolume(data, width=size[0], height=size[1],
@@ -545,7 +540,8 @@ class Trace:
         self.kwargs = kwargs
 
 
-def Geo(latitude, longitude, data=None, colorlabel=None, **kwargs):
+def Geo(latitude, longitude, data=None, colormap=None, colorlabel=None, colorrange=None,
+        opacity=None, pointsize=None, showcolorbar=True, **kwargs):
     latitude = np.asarray(latitude)
     longitude = np.asarray(longitude)
     if data is not None:
@@ -556,13 +552,19 @@ def Geo(latitude, longitude, data=None, colorlabel=None, **kwargs):
         latitude=latitude,
         longitude=longitude,
         data=data,
+        colormap=colormap,
         colorlabel=colorlabel,
+        colorrange=colorrange,
+        showcolorbar=showcolorbar,
+        opacity=opacity,
+        pointsize=pointsize,
         **kwargs
     ))
     return mapplot
 
 
-def Geo3D(latitude, longitude, data=None, colorlabel=None, **kwargs):
+def Geo3D(latitude, longitude, data=None, colormap=None, colorlabel=None, colorrange=None,
+          opacity=None, pointsize=None, showcolorbar=True, heightfactor=None, **kwargs):
     latitude = np.asarray(latitude)
     longitude = np.asarray(longitude)
     if data is not None:
@@ -574,7 +576,13 @@ def Geo3D(latitude, longitude, data=None, colorlabel=None, **kwargs):
         latitude=latitude,
         longitude=longitude,
         data=data,
+        colormap=colormap,
+        colorrange=colorrange,
         colorlabel=colorlabel,
+        opacity=opacity,
+        pointsize=pointsize,
+        showcolorbar=showcolorbar,
+        heightfactor=heightfactor,
         **kwargs
     ))
     return mapplot3d
@@ -582,7 +590,7 @@ def Geo3D(latitude, longitude, data=None, colorlabel=None, **kwargs):
 
 def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             pointsize=None, xnumticks=None, ynumticks=None, xerror=None,
-            yerror=None, lines=False, **kwargs):
+            yerror=None, lines=False, colorlabel=None, coords=None):  # TODO remove colorlabel, coords from plotdata
     xdata = np.asarray(xdata)
     ydata = np.asarray(ydata)
 
@@ -644,12 +652,12 @@ def Line(*args, **kwargs):
     return Scatter(*args, lines=True, **kwargs)
 
 
-def Histogram(data, bins=None, **kwargs):
+def Histogram(data, bins=None, title=None, ylabel=None):
     data = np.asarray(data)
 
     layout = {  # TODO dedupe
-        'title_text': kwargs['title'],
-        'xaxis_title_text': kwargs['ylabel'],  # TODO
+        'title_text': title,
+        'xaxis_title_text': ylabel,
         'barmode': 'overlay',
     }
 
@@ -659,7 +667,7 @@ def Histogram(data, bins=None, **kwargs):
         'histogram',
         x=data,
         nbinsx=bins * 2 if bins else None,  # TODO why *2 needed
-        name=kwargs['title'],
+        name=title,
         opacity=0.6
     ))
 
@@ -689,7 +697,7 @@ def _plotly_colorscale(colormap):
 
 
 def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorrange=None,
-            colormap=None, invert_yaxis=False, **kwargs):  # TODO actually more like a general rect plot..
+            colormap=None, invert_yaxis=False):  # TODO actually more like a general rect plot..
     _check_colormap(colormap)
 
     x = []
@@ -748,7 +756,8 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorr
 
 # TODO separate xcoords, ycoords
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
-            colorlabel=None, gap_threshold=None, colormap=None, colorrange=None, **kwargs):
+            colorlabel=None, gap_threshold=None, colormap=None, colorrange=None,
+            showcolorbar=True):
     _check_colormap(colormap)
 
     xcoords, ycoords = coords
