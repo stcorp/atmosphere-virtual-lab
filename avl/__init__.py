@@ -13,29 +13,6 @@ from . import vis
 
 from .vis import Plot, MapPlot, MapPlot3D
 
-_UNPREFERED_PATTERNS = [
-    "index",
-    "collocation_index",
-    "orbit_index",
-    ".*subindex",
-    "scan_direction_type",
-    "datetime.*",
-    "sensor_.*",
-    ".*validity",
-    ".*_uncertainty.*",
-    ".*_apriori.*",
-    ".*_amf.*",
-    "wavenumber$",
-    "wavelength$",
-    ".*latitude.*",
-    ".*longitude.*",
-    ".*altitude",
-    ".*geoid_height",
-    ".*geopotential",
-    ".*pressure",
-    ".*_angle"
-]
-
 """
 Atmosphere Virtual Lab
 
@@ -81,6 +58,29 @@ Combining data traces:
     plot
 
 """
+
+_UNPREFERED_PATTERNS = [
+    "index",
+    "collocation_index",
+    "orbit_index",
+    ".*subindex",
+    "scan_direction_type",
+    "datetime.*",
+    "sensor_.*",
+    ".*validity",
+    ".*_uncertainty.*",
+    ".*_apriori.*",
+    ".*_amf.*",
+    "wavenumber$",
+    "wavelength$",
+    ".*latitude.*",
+    ".*longitude.*",
+    ".*altitude",
+    ".*geoid_height",
+    ".*geopotential",
+    ".*pressure",
+    ".*_angle"
+]
 
 
 def download(files, target_directory="."):
