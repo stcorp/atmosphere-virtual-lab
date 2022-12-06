@@ -793,10 +793,10 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
 
     colorscale = _plotly_colorscale(colormap)
 
-#    if colorrange is not None:
-#        cmin, cmax = colorrange
-#    else:
-#        cmin, cmax = np.nanmin(data), np.nanmax(data)
+    if colorrange is not None:
+        zmin, zmax = colorrange
+    else:
+        zmin, zmax = np.nanmin(data), np.nanmax(data)
 
     fig.add(Trace(
         'heatmap',
@@ -804,8 +804,8 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
         x=xcoords,
         y=ycoords,
         colorscale=colorscale,
-#        cmin=cmin,
-#        cmax=cmax,
+        zmin=zmin,
+        zmax=zmax,
         colorbar={'title': colorlabel},
     ))
 
