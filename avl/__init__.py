@@ -696,6 +696,7 @@ def curtain_data(product, value=None, **kwargs):
     # derive datetime_start
     x_start = x_stop = None
 
+
     if 'datetime_start' in product_values:
         x_start = product.datetime_start.data
         x_unit = product.datetime_start.unit
@@ -728,7 +729,7 @@ def curtain_data(product, value=None, **kwargs):
     if x_start is None or x_stop is None:
         if 'datetime' in product_values:
             dts = product.datetime.data
-            midpoints = dts[:-1] + (dts[1:] - dts[:-1])
+            midpoints = dts[:-1] + (dts[1:] - dts[:-1]) / 2
             x_start = np.append((3 * dts[:1] - dts[1:2]) / 2, midpoints)
             x_stop = np.append(midpoints, (3 * dts[-1:] - dts[-2:-1]) / 2)
             x_unit = product.datetime.unit
