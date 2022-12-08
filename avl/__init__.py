@@ -694,6 +694,8 @@ def curtain_data(product, value=None, **kwargs):
     invert_yaxis = False
 
     # derive datetime_start
+    x_start = x_stop = None
+
     if 'datetime_start' in product_values:
         x_start = product.datetime_start.data
         x_unit = product.datetime_start.unit
@@ -703,11 +705,13 @@ def curtain_data(product, value=None, **kwargs):
     elif 'datetime_stop' in product_values and 'datetime_length' in product_values:
         x_start = product.datetime_stop.data - product.datetime_length.data
         x_unit = product.datetime_stop.unit
+    elif 'datetime_stop' in product_values:
+        x_stop = product.datetime_stop.data
+        x_start = np.append(x_stop[:1], x_stop[:-1])  # TODO extrap first
+        x_unit = product.datetime_stop.unit
     elif 'datetime' in product_values and 'datetime_length' in product_values:
         x_start = product.datetime.data - (product.datetime_length.data / 2)
         x_unit = product.datetime.unit
-    else:
-        raise ValueError('cannot determine time boundaries')  # TODO interpolate as for bounds below?
 
     # derive datetime_stop
     if 'datetime_stop' in product_values:
@@ -716,10 +720,13 @@ def curtain_data(product, value=None, **kwargs):
         x_stop = product.datetime.data + (product.datetime.data - product.datetime_start.data)
     elif 'datetime_start' in product_values and 'datetime_length' in product_values:
         x_stop = product.datetime_start.data + product.datetime_length.data
+    elif 'datetime_start' in product_values:
+        x_stop = np.append(x_start[1:], x_start[-1:])  # TODO extrap last
     elif 'datetime' in product_values and 'datetime_length' in product_values:
         x_stop = product.datetime.data + (product.datetime_length.data / 2)
-    else:
-        raise ValueError('cannot determine time boundaries')  # TODO interpolate as for bounds below?
+
+    if x_start is None or x_stop is None:
+        raise ValueError('cannot determine time boundaries')
 
     # derive bounds for 'vertical' dimension
     if dimensions[1] == 'vertical':
