@@ -805,7 +805,7 @@ def Heatmap(product, value, colormap='viridis', colorrange=None, **kwargs):
     colormap -- Colormap name (matplotlib) or list of (r,g,b), (r,g,b,a)
                 or (x,r,g,b,a) values (ranging from 0..1)
     colorrange -- Color range to use (default min, max of data)
-    gap_threshold -- Add gaps when larger (np.timedelta, default 24h)
+    gap_threshold -- Add gaps when larger (np.timedelta64)
 
     """
     data = heatmap_data(product, value)

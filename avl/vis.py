@@ -781,19 +781,22 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
     fig = Plot(layout)
 
     # insert gaps
-    if gap_threshold is None:
-        gap_threshold = np.timedelta64(24, 'h')
-    halfgap = gap_threshold / 2
-
     xdata_new = []
     xcoords_new = []
     for i in range(len(data)):
         xdata_new.append(data[i])
 
         if i == 0:
-            xcoords_new.append(xcoords[i] - halfgap)
+            distance = xcoords[1] - xcoords[0]
+            if gap_threshold is not None:
+                halfgap = gap_threshold / 2
+                xcoords_new.append(xcoords[0] - min(distance / 2, halfgap))
+            else:
+                xcoords_new.append(xcoords[0] - distance / 2)
+
         if i < len(data) - 1:
-            if xcoords[i + 1] - xcoords[i] > gap_threshold:
+            if gap_threshold is not None and xcoords[i + 1] - xcoords[i] > gap_threshold:
+                halfgap = gap_threshold / 2
                 xcoords_new.append(xcoords[i] + halfgap)
                 xcoords_new.append(xcoords[i + 1] - halfgap)
 
@@ -801,7 +804,12 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
             else:
                 xcoords_new.append(xcoords[i] + ((xcoords[i + 1] - xcoords[i]) / 2))
         else:
-            xcoords_new.append(xcoords[i] + halfgap)
+            distance = xcoords[-1] - xcoords[-2]
+            if gap_threshold is not None:
+                halfgap = gap_threshold / 2
+                xcoords_new.append(xcoords[-1] + min(distance / 2, halfgap))
+            else:
+                xcoords_new.append(xcoords[-1] + distance / 2)
 
     data = np.array(xdata_new)
     xcoords = xcoords_new
