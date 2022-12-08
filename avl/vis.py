@@ -725,7 +725,10 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorr
             if np.isnan(y1) or np.isnan(y2) or np.isnan(data[i][j]):
                 continue
             x.append(x1)
-            width.append((x2-x1).item().total_seconds()*1000)
+            w = ((x2-x1).item().total_seconds()*1000)
+            if w < 0:
+                w = 0
+            width.append(w)
             base.append(y1)
             y.append(y2-y1)
             z.append(data[i][j])
