@@ -758,6 +758,7 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorr
 
 
 # TODO separate xcoords, ycoords
+# TODO check handling of 1-length arrays in interpolation (not just for heatmap)
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
             colorlabel=None, gap_threshold=None, colormap=None, colorrange=None,
             showcolorbar=True):
