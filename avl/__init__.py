@@ -698,6 +698,7 @@ def curtain_data(product, value=None, **kwargs):
 
     if 'datetime_start' in product_values:
         x_start = product.datetime_start.data
+#        print('START', x_start[1:]-x_start[:-1])
         x_unit = product.datetime_start.unit
     elif 'datetime_stop' in product_values and 'datetime' in product_values:
         x_start = product.datetime.data - (product.datetime_stop.data - product.datetime.data)
@@ -716,6 +717,7 @@ def curtain_data(product, value=None, **kwargs):
     # derive datetime_stop
     if 'datetime_stop' in product_values:
         x_stop = product.datetime_stop.data
+#        print('STOP', x_stop[1:]-x_stop[:-1])
     elif 'datetime_start' in product_values and 'datetime' in product_values:
         x_stop = product.datetime.data + (product.datetime.data - product.datetime_start.data)
     elif 'datetime_start' in product_values and 'datetime_length' in product_values:
@@ -726,7 +728,14 @@ def curtain_data(product, value=None, **kwargs):
         x_stop = product.datetime.data + (product.datetime_length.data / 2)
 
     if x_start is None or x_stop is None:
-        raise ValueError('cannot determine time boundaries')
+        if 'datetime' in product_values:
+            dts = product.datetime.data
+            midpoints = dts[:-1] + (dts[1:] - dts[:-1])
+            x_start = np.append(dts[:1], midpoints)  # TODO extrap first
+            x_stop = np.append(midpoints, dts[-1:])  # TODO extrap last
+            x_unit = product.datetime.unit
+        else:
+            raise ValueError('cannot determine time boundaries')
 
     # derive bounds for 'vertical' dimension
     if dimensions[1] == 'vertical':
