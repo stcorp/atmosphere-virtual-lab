@@ -698,7 +698,6 @@ def curtain_data(product, value=None, **kwargs):
 
     if 'datetime_start' in product_values:
         x_start = product.datetime_start.data
-#        print('START', x_start[1:]-x_start[:-1])
         x_unit = product.datetime_start.unit
     elif 'datetime_stop' in product_values and 'datetime' in product_values:
         x_start = product.datetime.data - (product.datetime_stop.data - product.datetime.data)
@@ -708,7 +707,7 @@ def curtain_data(product, value=None, **kwargs):
         x_unit = product.datetime_stop.unit
     elif 'datetime_stop' in product_values:
         x_stop = product.datetime_stop.data
-        x_start = np.append(x_stop[:1], x_stop[:-1])  # TODO extrap first
+        x_start = np.append((3 * x_stop[:1] - x_stop[1:2]) / 2, x_stop[:-1])  # TODO to helper func, also below
         x_unit = product.datetime_stop.unit
     elif 'datetime' in product_values and 'datetime_length' in product_values:
         x_start = product.datetime.data - (product.datetime_length.data / 2)
@@ -717,13 +716,12 @@ def curtain_data(product, value=None, **kwargs):
     # derive datetime_stop
     if 'datetime_stop' in product_values:
         x_stop = product.datetime_stop.data
-#        print('STOP', x_stop[1:]-x_stop[:-1])
     elif 'datetime_start' in product_values and 'datetime' in product_values:
         x_stop = product.datetime.data + (product.datetime.data - product.datetime_start.data)
     elif 'datetime_start' in product_values and 'datetime_length' in product_values:
         x_stop = product.datetime_start.data + product.datetime_length.data
     elif 'datetime_start' in product_values:
-        x_stop = np.append(x_start[1:], x_start[-1:])  # TODO extrap last
+        x_stop = np.append(x_start[1:], (3*x_start[-1:] - x_start[-2:-1])/2)
     elif 'datetime' in product_values and 'datetime_length' in product_values:
         x_stop = product.datetime.data + (product.datetime_length.data / 2)
 
@@ -731,8 +729,8 @@ def curtain_data(product, value=None, **kwargs):
         if 'datetime' in product_values:
             dts = product.datetime.data
             midpoints = dts[:-1] + (dts[1:] - dts[:-1])
-            x_start = np.append(dts[:1], midpoints)  # TODO extrap first
-            x_stop = np.append(midpoints, dts[-1:])  # TODO extrap last
+            x_start = np.append((3 * dts[:1] - dts[1:2]) / 2, midpoints)
+            x_stop = np.append(midpoints, (3 * dts[-1:] - dts[-2:-1]) / 2)
             x_unit = product.datetime.unit
         else:
             raise ValueError('cannot determine time boundaries')
