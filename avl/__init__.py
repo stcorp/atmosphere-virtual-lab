@@ -668,7 +668,7 @@ def _get_timestamps(values, unit):
     if base not in ["s", "seconds", "days"]:
         raise ValueError("unsupported unit: %s" % unit)
 
-    xdata_dt = np.empty(len(values), dtype='datetime64[s]')
+    xdata_dt = np.empty(len(values), dtype='datetime64[us]')
 
     # TODO avoid dep on coda
     formats = ("yyyy-MM-dd HH:mm:ss.SSSSSS|"
@@ -677,9 +677,9 @@ def _get_timestamps(values, unit):
     offset = coda.time_string_to_double(formats, epoch) + (datetime(2000, 1, 1) - datetime(1970, 1, 1)).total_seconds()
 
     if base == "days":
-        xdata_dt[:] = values * 86400 + offset
+        xdata_dt[:] = (values * 86400 + offset) * 1e6
     else:
-        xdata_dt[:] = values + offset
+        xdata_dt[:] = (values + offset) * 1e6
 
     return xdata_dt
 
