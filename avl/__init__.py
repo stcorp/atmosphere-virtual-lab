@@ -281,7 +281,7 @@ def _plot_data(product, value=None, average=False):
 
     if xdata.dimension == ['time', 'vertical']:  # TODO generalize
         xlabel = 'time'
-        ylabel = 'altitude (km)'
+        ylabel = 'altitude (%s)' % product['altitude'].unit
         colorlabel = xunit
         xdata_dt = _get_timestamps(product.datetime.data, product.datetime.unit)
         coords = (xdata_dt, product.altitude.data)
