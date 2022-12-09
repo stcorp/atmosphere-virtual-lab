@@ -787,6 +787,7 @@ def curtain_data(product, value, **kwargs):
         'xdata': x,
         'ydata': y,
         'data': data,
+        'xlabel': 'time',
         'ylabel': ylabel,
         'colorlabel': colorlabel,
         'invert_yaxis': invert_yaxis,

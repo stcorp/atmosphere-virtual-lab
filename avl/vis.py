@@ -696,7 +696,7 @@ def _plotly_colorscale(colormap):
     return colorscale
 
 
-def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorrange=None,
+def Curtain(xdata, ydata, data, title=None, xlabel=None, ylabel=None, colorlabel=None, colorrange=None,
             colormap=None, invert_yaxis=False):  # TODO actually more like a general rect plot..
     _check_colormap(colormap)
 
@@ -709,6 +709,9 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorr
     layout = {
         'title': title,
         'title_x': 0.5,
+        'xaxis': {
+            'title': xlabel,
+        },
         'yaxis': {
             'title': ylabel,
         },
