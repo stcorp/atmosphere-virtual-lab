@@ -771,6 +771,7 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
 
     layout = {
         'title': title,
+        'title_x': 0.5,
         'xaxis': {
             'title': xlabel,
         },
