@@ -724,7 +724,7 @@ def Curtain(xdata, ydata, data, title=None, ylabel=None, colorlabel=None, colorr
             y1, y2 = ydata[i][j]
             if np.isnan(y1) or np.isnan(y2) or np.isnan(data[i][j]):
                 continue
-            x.append(x1)
+            x.append(x1 + (x2-x1)/2)  # TODO pass midpoints directly..?
             w = ((x2-x1).item().total_seconds()*1000)
             if w < 0:
                 w = 0
