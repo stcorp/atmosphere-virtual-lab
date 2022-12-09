@@ -684,13 +684,13 @@ def _get_timestamps(values, unit):
     return xdata_dt
 
 
-def curtain_data(product, value=None, **kwargs):
+def curtain_data(product, value, **kwargs):
     value = _get_product_value(product, value, dims=(2,))
     data = product[value].data
     dimensions = product[value].dimension
     product_values = list(product)
     colorlabel = product[value].unit
-    title = product[value].description or value.replace('_', ' ')
+    title = value.replace('_', ' ')
     invert_yaxis = False
 
     # derive datetime_start
