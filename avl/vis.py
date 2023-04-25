@@ -202,6 +202,7 @@ class MapPlot:
                 "pointsize": kwargs.get('pointsize'),
                 "opacity": kwargs.get('opacity'),
                 "colormap": colormap,
+                "label": kwargs.get('label'),
             }
             featureGlLayer = IpyleafletGlVectorLayer(**args)
             self.wrapper.add_layer(featureGlLayer)
@@ -541,7 +542,7 @@ class Trace:
 
 
 def Geo(latitude, longitude, data=None, colormap=None, colorlabel=None, colorrange=None,
-        opacity=None, pointsize=None, showcolorbar=True, **kwargs):
+        opacity=None, pointsize=None, showcolorbar=True, label=None, **kwargs):
     latitude = np.asarray(latitude)
     longitude = np.asarray(longitude)
     if data is not None:
@@ -558,6 +559,7 @@ def Geo(latitude, longitude, data=None, colormap=None, colorlabel=None, colorran
         showcolorbar=showcolorbar,
         opacity=opacity,
         pointsize=pointsize,
+        label=label,
         **kwargs
     ))
     return mapplot
