@@ -233,8 +233,7 @@ class MapPlot3D:
         self.zoom = zoom
 
         # 3d projection
-        self.p1 = pyproj.Proj(proj='longlat', a=6.1e9, b=6.1e9)
-        self.p2 = pyproj.Proj(proj='geocent', a=6.1e9, b=6.1e9)
+        self.trans = pyproj.Transformer.from_proj("+proj=longlat +a=6.1e9 +b=6.1e9", "+proj=geocent +a=6.1e9 +b=6.1e9")
 
         self._traces = []
 
@@ -288,7 +287,7 @@ class MapPlot3D:
         if data_type == _kSwathData:
             # data points
             arrz = np.array([0] * 4 * len(data))
-            fx, fy, fz = pyproj.transform(self.p1, self.p2, longitude.flat, latitude.flat, arrz)
+            fx, fy, fz = self.trans.transform(longitude.flat, latitude.flat, arrz)
 
             arr = np.column_stack([fx, fy, fz])
             data_points = numpyTovtkDataArray(arr)
@@ -337,7 +336,7 @@ class MapPlot3D:
                 arrz = np.zeros(latgrid.shape)
 
             # transform to 3d vtk points
-            fx, fy, fz = pyproj.transform(self.p1, self.p2, longrid.flat, latgrid.flat, arrz.flat)
+            fx, fy, fz = self.trans.transform(longrid.flat, latgrid.flat, arrz.flat)
             arr = np.column_stack([fx, fy, fz])
             data_points = numpyTovtkDataArray(arr)
 
@@ -362,7 +361,7 @@ class MapPlot3D:
         elif data_type == _kPointData:
             # data points
             arrz = np.zeros(len(longitude))
-            fx, fy, fz = pyproj.transform(self.p1, self.p2, longitude.flat, latitude.flat, arrz)
+            fx, fy, fz = self.trans.transform(longitude.flat, latitude.flat, arrz)
 
             arr = np.column_stack([fx, fy, fz])
             data_points = numpyTovtkDataArray(arr)
@@ -501,7 +500,7 @@ class MapPlot3D:
         # camera
         camera = vtk.vtkCamera()
         dist = 3e10 - (self.zoom or 0) * 2e9  # TODO incorrect/different
-        cx, cy, cz = pyproj.transform(self.p1, self.p2, self.centerlon, self.centerlat, dist)
+        cx, cy, cz = self.trans.transform(self.centerlon, self.centerlat, dist)
         camera.SetPosition(cx, cy, cz)
         camera.SetViewUp(0, 0, 1)
         camera.SetFocalPoint(0, 0, 0)
