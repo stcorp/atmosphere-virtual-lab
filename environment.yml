@@ -1,4 +1,4 @@
-name: avl
+name: avl-dev
 channels:
   - conda-forge
 dependencies:
