@@ -9,6 +9,7 @@ setup(
     license="BSD",
     packages=["avl"],
     install_requires=[
+        "boto3",
         "cmcrameri",
         "ipyleaflet",
         "ipywidgets",

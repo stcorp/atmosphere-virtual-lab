@@ -2,6 +2,7 @@ name: avl-dev
 channels:
   - conda-forge
 dependencies:
+  - boto3
   - cmcrameri
   - coda
   - harp
