@@ -21,7 +21,9 @@ def download(products, target_directory="."):
     target_directory -- path where to store products (default '.')
     """
     if isinstance(products, (list, tuple)):
-        return [download(product) for product in products]
+        for product in products:
+            download(product)
+        return
 
     product = os.path.basename(products)
     targetpath = os.path.join(target_directory, product)
@@ -35,7 +37,8 @@ def download(products, target_directory="."):
     for mapping in MAPPING:
         if re.match(mapping, product) is not None:
             download_backend = MAPPING[mapping]
-            return download_backend(product, target_directory)
+            download_backend(product, target_directory)
+            return
 
     # fileback to AVL archive
-    return avl.download(product, target_directory)
+    avl.download(product, target_directory)
