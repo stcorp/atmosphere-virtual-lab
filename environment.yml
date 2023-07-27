@@ -2,19 +2,20 @@ name: avl-dev
 channels:
   - conda-forge
 dependencies:
+  - cmcrameri
+  - coda
+  - harp
+  - ipyleaflet
+  - ipyleaflet-gl-vector-layer-plugin >=0.1.6
   - jupyterlab >=3
   - jupytext
+  - matplotlib-base
+  - numpy
+  - panel
+  - plotly
+  - pyproj
+  - pystac-client
   - python >=3.7
   - requests
-  - coda
-  - ipyleaflet-gl-vector-layer-plugin >=0.1.6
-  - ipyleaflet
-  - harp
-  - panel
-  - pyproj
-  - vtk >=9.1
-  - plotly
-  - numpy
   - scipy
-  - matplotlib-base
-  - cmcrameri
+  - vtk >=9.1
