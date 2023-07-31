@@ -2,7 +2,6 @@ name: avl-dev
 channels:
   - conda-forge
 dependencies:
-  - boto3
   - cmcrameri
   - coda
   - harp
@@ -15,7 +14,6 @@ dependencies:
   - panel
   - plotly
   - pyproj
-  - pystac-client
   - python >=3.7
   - requests
   - scipy

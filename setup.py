@@ -9,7 +9,6 @@ setup(
     license="BSD",
     packages=["avl"],
     install_requires=[
-        "boto3",
         "cmcrameri",
         "ipyleaflet",
         "ipywidgets",
@@ -18,7 +17,6 @@ setup(
         "panel",
         "plotly",
         "pyproj",
-        "pystac-client",
         "requests",
         "scipy",
         "vtk",

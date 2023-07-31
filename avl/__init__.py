@@ -6,11 +6,11 @@ import coda
 import harp
 import numpy as np
 import pyproj
+import requests
 from scipy.interpolate import griddata
 
 from . import vis
 
-from .download import download
 from .vis import Plot, MapPlot, MapPlot3D
 
 """
@@ -81,6 +81,29 @@ _UNPREFERED_PATTERNS = [
     ".*pressure",
     ".*_angle"
 ]
+
+
+def download(files, target_directory="."):
+    """
+    Download file(s) from `atmospherevirtuallab.org`, skipping files
+    that already exist.
+
+    Arguments:
+    files -- file name or list/tuple of file names
+    target_directory -- path where to store files (default '.')
+    """
+    if isinstance(files, (list, tuple)):
+        return [download(file) for file in files]
+    filename = os.path.basename(files)
+    targetpath = os.path.join(target_directory, filename)
+    if not os.path.exists(targetpath):
+        url = "https://atmospherevirtuallab.org/files/" + filename
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(os.path.join(target_directory, filename), 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+    return filename
 
 
 class _objdict(dict):
