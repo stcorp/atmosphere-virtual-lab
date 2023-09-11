@@ -485,7 +485,6 @@ def _mapplot_data(product, value=None, locationOnly=False):
         'data': data,
         'longitude': longitude.data,
         'latitude': latitude.data,
-#        'data_type': data_type,
         'colorlabel': prop.get('colorbartitle'),
     })
 
@@ -695,7 +694,6 @@ def curtain_data(product, value, **kwargs):
 
     # derive datetime_start
     x_start = x_stop = None
-
 
     if 'datetime_start' in product_values:
         x_start = product.datetime_start.data

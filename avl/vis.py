@@ -598,8 +598,8 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
     layout = {
         'title': {
             'text': title,
-            'y':0.9,
-            'x':0.5,
+            'y': 0.9,
+            'x': 0.5,
             'xanchor': 'center',
             'yanchor': 'top',
         },
@@ -694,7 +694,8 @@ def _plotly_colorscale(colormap):
             else:
                 colormap = [(x,) + color for x, color in colorspace]
 
-        colorscale = [(x, 'rgb(%.4f, %.4f, %.4f, %.4f)' % (255 * r, 255 * g, 255 * b, a)) for (x, r, g, b, a) in colormap]
+        colorscale = [(x, 'rgb(%.4f, %.4f, %.4f, %.4f)' % (255 * r, 255 * g, 255 * b, a))
+                      for (x, r, g, b, a) in colormap]
 
     else:
         cmap = _resolve_colormap(colormap)
