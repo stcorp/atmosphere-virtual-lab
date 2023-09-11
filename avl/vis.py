@@ -596,7 +596,13 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
     ydata = np.asarray(ydata)
 
     layout = {
-        'title': title,
+        'title': {
+            'text': title,
+            'y':0.9,
+            'x':0.5,
+            'xanchor': 'center',
+            'yanchor': 'top',
+        },
         'xaxis': {
             'title': xlabel,
             'nticks': xnumticks,
