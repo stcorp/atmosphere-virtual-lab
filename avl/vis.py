@@ -592,8 +592,18 @@ def Geo3D(latitude, longitude, data=None, colormap=None, colorlabel=None, colorr
 def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             pointsize=None, xnumticks=None, ynumticks=None, xerror=None,
             yerror=None, lines=False, colorlabel=None, coords=None):  # TODO remove colorlabel, coords from plotdata
-    xdata = np.asarray(xdata)
-    ydata = np.asarray(ydata)
+
+    if ydata is not None:
+        ydata = np.asarray(ydata)
+        if xdata is None:
+            xdata = np.arange(len(ydata))
+        else:
+            xdata = np.asarray(xdata)
+
+    else:
+        if xdata is not None:
+            ydata = xdata
+            xdata = np.arange(len(ydata))
 
     layout = {
         'title': {
