@@ -114,6 +114,7 @@ class Plot:  # TODO
             assert False
 
         for trace in traces:
+
             if trace.type_ == 'scatter':
                 self._fig.add_trace(go.Scatter(**trace.kwargs))
             elif trace.type_ == 'scattergl':
@@ -125,6 +126,18 @@ class Plot:  # TODO
             elif trace.type_ == 'bar':
                 self._fig.add_trace(go.Bar(**trace.kwargs))
             self._traces.append(trace)
+
+        if len(self._traces) > 1:
+            legend_check = None
+            for _trace in self._traces:
+                if "showlegend" in _trace.kwargs.keys():
+                    if _trace.kwargs["showlegend"] is False:
+                        legend_check = False
+                        break
+            if legend_check is None:
+                self._fig.update_traces(showlegend=True)
+            else:
+                self._fig.update_traces(showlegend=False)
 
         return self
 
@@ -591,7 +604,8 @@ def Geo3D(latitude, longitude, data=None, colormap=None, colorlabel=None, colorr
 
 def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             pointsize=None, xnumticks=None, ynumticks=None, xerror=None,
-            yerror=None, lines=False, colorlabel=None, coords=None):  # TODO remove colorlabel, coords from plotdata
+            yerror=None, lines=False, colorlabel=None, coords=None, showlegend=None, name=None):
+    # TODO remove colorlabel, coords from plotdata
 
     if ydata is not None:
         ydata = np.asarray(ydata)
@@ -634,14 +648,16 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             mode = None
         else:
             mode = 'markers'
-
+    if name is None:
+        name = "Scatter data"
     fig.add(Trace(
         'scattergl',
         x=xdata,
         y=ydata,
         error_y=error_y,
         mode=mode,
-        showlegend=False,
+        showlegend=showlegend,
+        name=name
     ))
 
     if xerror is not None:  # TODO y, scattergl broken for fillcolor?
@@ -650,7 +666,8 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             x=xdata - xerror,
             y=ydata,
             line={'width': 0},
-            showlegend=False,
+            showlegend=showlegend,
+            name="x-error trace",
         ))
         fig.add(Trace(
             'scatter',
@@ -659,7 +676,8 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             fill='tonexty',
             line={'width': 0},
             fillcolor='rgba(68, 68, 68, 0.3)',
-            showlegend=False,
+            showlegend=showlegend,
+            name="y-error trace",
         ))
 
     return fig
@@ -669,7 +687,7 @@ def Line(*args, **kwargs):
     return Scatter(*args, lines=True, **kwargs)
 
 
-def Histogram(data, bins=None, title=None, ylabel=None):
+def Histogram(data, bins=None, title=None, ylabel=None, showlegend=None, name=None):
     data = np.asarray(data)
 
     layout = {  # TODO dedupe
@@ -679,13 +697,15 @@ def Histogram(data, bins=None, title=None, ylabel=None):
     }
 
     fig = Plot(layout)
-
+    if name is None:
+        name = "Histogram data"
     fig.add(Trace(
         'histogram',
         x=data,
         nbinsx=bins * 2 if bins else None,  # TODO why *2 needed
-        name=title,
-        opacity=0.6
+        opacity=0.6,
+        showlegend=showlegend,
+        name=name
     ))
 
     return fig
