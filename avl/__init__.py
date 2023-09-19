@@ -283,17 +283,19 @@ def _plot_data(product, value=None, average=False):
         xlabel = 'time'
         ylabel = 'altitude (%s)' % product['altitude'].unit
         colorlabel = xunit
-        xdata_dt = _get_timestamps(product.datetime.data, product.datetime.unit)
+        xdata_dt = get_timestamps(product.datetime)
         coords = (xdata_dt, product.altitude.data)
-
-    xdata = xdata.data
-    ydata = ydata.data
 
     if xunit is not None:
         if " since " in xunit:  # TODO check dimension instead
-            xdata = _get_timestamps(xdata, xunit)
+            xdata = get_timestamps(xdata)
         elif xlabel is None:
             xlabel = xunit
+            xdata = xdata.data
+    else:
+        xdata = xdata.data
+
+    ydata = ydata.data
 
     if yunit is not None and ylabel is None:
         ylabel = yunit
@@ -658,7 +660,36 @@ def _calc_bounds(a):
     return np.stack([lower, upper], axis=2)
 
 
-def _get_timestamps(values, unit):
+def get_timestamps(input):
+    """
+    Return a formatted datetime array based on the input's time series
+
+    Arguments:
+    input -- Harp product, Harp variable or Python dict containing an array of time and units
+
+    Python dictionaries can be created and used as input which must contain a "data" and "unit" entry.
+
+    """
+    if type(input) is harp.Product:
+        if 'datetime' in input:
+            input = input['datetime']
+        elif 'datetime_start' in input:
+            input = input['datetime_start']
+        elif 'datetime_stop' in input:
+            input = input['datetime_stop']
+        if input is None:
+            raise ValueError("Could not determine x-axis for time-series"
+                             " data")
+
+    if type(input) is dict:
+        values = input["data"]
+        unit = input["unit"]
+    elif type(input) is harp.Variable:
+        values = input.data
+        unit = input.unit
+    else:
+        raise ValueError("Input must be a Harp product, Harp variable or a python dict")
+
     if " since " not in unit:
         raise ValueError("unsupported unit: %s" % unit)
 
@@ -771,8 +802,11 @@ def curtain_data(product, value, **kwargs):
                 raise ValueError('cannot determine spectral boundaries')
 
     # correct time stamps via unit
-    xdata_start = _get_timestamps(x_start, x_unit)
-    xdata_stop = _get_timestamps(x_stop, x_unit)
+
+    x_data_start = {"data": x_start, "unit": x_unit}
+    x_data_stop = {"data": x_stop, "unit": x_unit}
+    xdata_start = get_timestamps(x_data_start)
+    xdata_stop = get_timestamps(x_data_stop)
 
     # make x same shape as y (more flexible)  # TODO faster/nicer
     x = np.column_stack([xdata_start, xdata_stop])
