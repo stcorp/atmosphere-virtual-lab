@@ -258,8 +258,9 @@ def _plot_data(product, value=None, average=False):
     if xunit is not None:
         if " since " in xunit:  # TODO check dimension instead
             xdata = get_timestamps(xdata)
-        elif xlabel is None:
-            xlabel = xunit
+        else:
+            if xlabel is None:
+                xlabel = xunit
             xdata = xdata.data
     else:
         xdata = xdata.data
