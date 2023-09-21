@@ -123,35 +123,6 @@ class _objdict(dict):
             raise AttributeError("No such attribute: " + name)
 
 
-def _get_attributes(product):
-    # we return all scalars and 1D (time dependent) variables
-    def attr_value(value, variable):
-        if hasattr(variable, "unit"):
-            if " since " in variable.unit:
-                # this is a time value
-                base, epoch = variable.unit.split(" since ")
-                if base in ["s", "seconds", "days"]:
-                    if base == "days":
-                        value *= 86400
-                    formats = ("yyyy-MM-dd HH:mm:ss.SSSSSS|"
-                               "yyyy-MM-dd HH:mm:ss|"
-                               "yyyy-MM-dd")
-                    value = value + coda.time_string_to_double(formats, epoch)
-                    return coda.time_to_string(value)
-            return "%s [%s]" % (str(value), variable.unit)
-        return str(value)
-
-    attr = {}
-    for name in list(product):
-        if len(product[name].dimension) == 0:
-            attr[name] = attr_value(product[name].data, product[name])
-        elif (len(product[name].dimension) == 1 and
-              product[name].dimension[0] == 'time'):
-            attr[name] = [attr_value(value, product[name]) for value in product[name].data]
-
-    return attr
-
-
 def _get_midpoint_axis_from_bounds(bounds_variable, log=False):
     if (bounds_variable.data.shape[-1] != 2 or
             bounds_variable.dimension[-1] is not None):
@@ -215,7 +186,6 @@ def _plot_data(product, value=None, average=False):
     value = _get_product_value(product, value)
     xdata = None
     ydata = product[value]
-    attr = {}
     location = []
     prop = {'title': value.replace('_', ' '), 'name': value}
 
@@ -246,7 +216,6 @@ def _plot_data(product, value=None, average=False):
             if ydata is None:
                 raise ValueError("Could not determine y-axis for vertical"
                                  " profile data ('%s')" % value)
-        attr = _get_attributes(product)
     else:
         if 'datetime' in product:
             xdata = product['datetime']
@@ -466,11 +435,9 @@ def _mapplot_data(product, value=None, locationOnly=False):
             value = _get_prefered_value(variable_names)
 
     data = None
-    attr = {}
     prop = {}
 
     if data_type == kGridData:
-        attr = _get_attributes(product)
         if value is None:
             raise ValueError("HARP product has no variable to use for gridded plot")
 
