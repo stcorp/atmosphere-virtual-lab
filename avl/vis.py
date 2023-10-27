@@ -215,7 +215,7 @@ class MapPlot:
                 "pointsize": kwargs.get('pointsize'),
                 "opacity": kwargs.get('opacity'),
                 "colormap": colormap,
-                "label": kwargs.get('label'),
+                "label": kwargs.get('colorlabel'),
             }
             featureGlLayer = IpyleafletGlVectorLayer(**args)
             self.wrapper.add_layer(featureGlLayer)
@@ -282,7 +282,7 @@ class MapPlot3D:
                                          kwargs['opacity'],
                                          kwargs['pointsize'])
 
-            colorbar_actor = self.colorbar_actor(lut, kwargs['colorlabel'])
+            colorbar_actor = self.colorbar_actor(lut, kwargs.get('colorlabel'))
 
             self._renderer.AddActor(data_actor)
 
@@ -471,9 +471,10 @@ class MapPlot3D:
         lut.Build()
         return lut
 
-    def colorbar_actor(self, lut, colorlabel):
+    def colorbar_actor(self, lut, colorlabel=None):
         actor = vtk.vtkScalarBarActor()
-        actor.SetTitle(colorlabel)
+        if colorlabel is not None:
+            actor.SetTitle(colorlabel)
         actor.SetOrientationToHorizontal()
         actor.SetLookupTable(lut)
 
@@ -554,7 +555,7 @@ class Trace:
 
 
 def Geo(latitude, longitude, data=None, colormap=None, colorlabel=None, colorrange=None,
-        opacity=None, pointsize=None, showcolorbar=True, label=None, **kwargs):
+        opacity=None, pointsize=None, showcolorbar=True, **kwargs):
     latitude = np.asarray(latitude)
     longitude = np.asarray(longitude)
     if data is not None:
@@ -571,7 +572,6 @@ def Geo(latitude, longitude, data=None, colormap=None, colorlabel=None, colorran
         showcolorbar=showcolorbar,
         opacity=opacity,
         pointsize=pointsize,
-        label=label,
         **kwargs
     ))
     return mapplot
@@ -650,8 +650,12 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             mode = 'markers'
     if name is None:
         name = "Scatter data"
+    if os.getenv('AVL_DISABLE_SCATTERGL') is not None:
+        scatter_type = 'scatter'
+    else:
+        scatter_type = 'scattergl'
     fig.add(Trace(
-        'scattergl',
+        scatter_type,
         x=xdata,
         y=ydata,
         error_y=error_y,
