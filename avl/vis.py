@@ -650,8 +650,12 @@ def Scatter(xdata=None, ydata=None, title=None, xlabel=None, ylabel=None,
             mode = 'markers'
     if name is None:
         name = "Scatter data"
+    if os.getenv('AVL_DISABLE_SCATTERGL') is not None:
+        scatter_type = 'scatter'
+    else:
+        scatter_type = 'scattergl'
     fig.add(Trace(
-        'scattergl',
+        scatter_type,
         x=xdata,
         y=ydata,
         error_y=error_y,
