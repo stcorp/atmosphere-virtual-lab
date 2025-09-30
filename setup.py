@@ -10,6 +10,7 @@ setup(
     packages=["avl"],
     install_requires=[
         "cmcrameri",
+        "importlib_resources",
         "ipyleaflet",
         "ipywidgets",
         "matplotlib",

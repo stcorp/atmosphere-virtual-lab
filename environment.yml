@@ -5,6 +5,7 @@ dependencies:
   - cmcrameri
   - coda
   - harp
+  - importlib_resources
   - ipyleaflet
   - ipyleaflet-gl-vector-layer-plugin >=0.1.6
   - jupyterlab >=3
