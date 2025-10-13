@@ -1,4 +1,3 @@
-import datetime
 from importlib_resources import files, as_file
 import os
 
@@ -6,13 +5,11 @@ from IPython.display import display
 from ipywidgets import Layout
 import ipyleaflet
 import matplotlib
-import cmcrameri
 import numpy as np
 import panel as pn
 import plotly.graph_objects as go
 import pyproj
 import vtk
-import io
 from vtk.numpy_interface.dataset_adapter import numpyTovtkDataArray
 import vtk.util.numpy_support  # TODO use newer numpy_interface?
 
