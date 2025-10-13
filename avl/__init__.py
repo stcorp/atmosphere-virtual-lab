@@ -540,10 +540,13 @@ def histogram_data(product, value, **kwargs):
 
     var = product[value]
 
+    ylabel = ""
+    if hasattr(var, 'unit'):
+        ylabel = var.unit
     return {
         'data': var.data,
         'title': value.replace('_', ' '),
-        'ylabel': var.unit,
+        'ylabel': ylabel,
     }
 
 
@@ -687,7 +690,9 @@ def curtain_data(product, value, **kwargs):
     data = product[value].data
     dimensions = product[value].dimension
     product_values = list(product)
-    colorlabel = product[value].unit
+    colorlabel = ""
+    if hasattr(product[value], 'unit'):
+        colorlabel = product[value].unit
     title = value.replace('_', ' ')
     invert_yaxis = False
 
