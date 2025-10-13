@@ -186,7 +186,6 @@ def _plot_data(product, value=None, average=False):
     value = _get_product_value(product, value)
     xdata = None
     ydata = product[value]
-    location = []
     prop = {'title': value.replace('_', ' '), 'name': value}
 
     if len(product[value].dimension) == 2:
@@ -226,11 +225,6 @@ def _plot_data(product, value=None, average=False):
         if xdata is None:
             raise ValueError("Could not determine x-axis for time-series"
                              " data ('%s')" % value)
-
-    if 'latitude_bounds' in product and 'longitude_bounds' in product:
-        location = [product.latitude_bounds.data, product.longitude_bounds.data]
-    elif 'latitude' in product and 'longitude' in product:
-        location = [product.latitude.data, product.longitude.data]
 
     try:
         xunit = xdata.unit
