@@ -73,13 +73,13 @@ def _check_colormap(colormap):
 
 def _resolve_colormap(colormap):
     if colormap is None:
-        return matplotlib.cm.get_cmap('viridis')
+        return matplotlib.colormaps.get_cmap('viridis')
     else:
         try:
-            return matplotlib.cm.get_cmap('cmc.' + colormap)
+            return matplotlib.colormaps.get_cmap('cmc.' + colormap)
         except ValueError:
             try:
-                return matplotlib.cm.get_cmap(colormap)
+                return matplotlib.colormaps.get_cmap(colormap)
             except ValueError:
                 raise Exception('unsupported colormap: ' + colormap)
 
@@ -727,19 +727,16 @@ def _plotly_colorscale(colormap):
             # (r,g,b,a)
             else:
                 colormap = [(x,) + color for x, color in colorspace]
-
-        colorscale = [(x, 'rgb(%.4f, %.4f, %.4f, %.4f)' % (255 * r, 255 * g, 255 * b, a))
-                      for (x, r, g, b, a) in colormap]
-
     else:
         cmap = _resolve_colormap(colormap)
-        colorscale = [(i, 'rgb(%.4f, %.4f, %.4f)' % tuple(cmap(i)[:3])) for i in np.linspace(0, 1, 256)]
-
+        colormap = [np.asarray((i,) + cmap(i, bytes=False)) for i in np.linspace(0, 1, 256)]
+    colorscale = [(x, 'rgb(%.4f, %.4f, %.4f, %.4f)' % (255 * r, 255 * g, 255 * b, a))
+                  for (x, r, g, b, a) in colormap]
     return colorscale
 
 
 def Curtain(xdata, ydata, data, title=None, xlabel=None, ylabel=None, colorlabel=None, colorrange=None,
-            colormap=None, invert_yaxis=False):  # TODO actually more like a general rect plot..
+            colormap=None, log=False, invert_yaxis=False):  # TODO actually more like a general rect plot..
     _check_colormap(colormap)
 
     x = []
@@ -747,6 +744,9 @@ def Curtain(xdata, ydata, data, title=None, xlabel=None, ylabel=None, colorlabel
     width = []
     base = []
     z = []
+
+    if log:
+        data = np.log10(data)
 
     layout = {
         'title': title,
@@ -782,8 +782,19 @@ def Curtain(xdata, ydata, data, title=None, xlabel=None, ylabel=None, colorlabel
 
     if colorrange is not None:
         cmin, cmax = colorrange
+        if log:
+            cmin = np.log10(cmin)
+            cmax = np.log10(cmax)
     else:
         cmin, cmax = min(z), max(z)
+
+    colorbar = {'title': {'text': colorlabel}}
+    if log:
+        ticks_values = [10**e for e in range(-18,12)]
+        ticks_text = ["%.e" % t for t in ticks_values]
+        colorbar['tickmode'] = "array"
+        colorbar['tickvals'] = [float(np.log10(t)) for t in ticks_values]
+        colorbar['ticktext'] = ticks_text
 
     fig.add(Trace(
         'bar',
@@ -792,10 +803,11 @@ def Curtain(xdata, ydata, data, title=None, xlabel=None, ylabel=None, colorlabel
         width=width,
         base=base,
         marker_color=z,
-        marker_cmin=cmin, marker_cmax=cmax,
+        marker_cmin=cmin,
+        marker_cmax=cmax,
         marker_showscale=True,
         marker_line_width=0,
-        marker_colorbar={'title': colorlabel},
+        marker_colorbar=colorbar,
         marker_colorscale=colorscale,
     ))
 
@@ -806,13 +818,15 @@ def Curtain(xdata, ydata, data, title=None, xlabel=None, ylabel=None, colorlabel
 # TODO check handling of 1-length arrays in interpolation (not just for heatmap)
 def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
             colorlabel=None, gap_threshold=None, colormap=None, colorrange=None,
-            showcolorbar=True):
+            showcolorbar=True, log=False):
     _check_colormap(colormap)
 
     xcoords, ycoords = coords
     xcoords = np.asarray(xcoords)
     ycoords = np.asarray(ycoords)
     data = np.asarray(data)
+    if log:
+        data = np.log10(data)
 
     layout = {
         'title': title,
@@ -865,8 +879,19 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
 
     if colorrange is not None:
         zmin, zmax = colorrange
+        if log:
+            zmin = np.log10(zmin)
+            zmax = np.log10(zmax)
     else:
         zmin, zmax = np.nanmin(data), np.nanmax(data)
+
+    colorbar = {'title': {'text': colorlabel}}
+    if log:
+        ticks_values = [10**e for e in range(-18,12)]
+        ticks_text = ["%.e" % t for t in ticks_values]
+        colorbar['tickmode'] = "array"
+        colorbar['tickvals'] = [float(np.log10(t)) for t in ticks_values]
+        colorbar['ticktext'] = ticks_text
 
     fig.add(Trace(
         'heatmap',
@@ -876,7 +901,7 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
         colorscale=colorscale,
         zmin=zmin,
         zmax=zmax,
-        colorbar={'title': colorlabel},
+        colorbar=colorbar,
     ))
 
     return fig
