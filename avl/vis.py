@@ -787,7 +787,7 @@ def Curtain(xdata, ydata, data, title=None, xlabel=None, ylabel=None, colorlabel
 
     colorbar = {'title': {'text': colorlabel}}
     if log:
-        ticks_values = [10**e for e in range(-18,12)]
+        ticks_values = [10**e for e in range(-18, 12)]
         ticks_text = ["%.e" % t for t in ticks_values]
         colorbar['tickmode'] = "array"
         colorbar['tickvals'] = [float(np.log10(t)) for t in ticks_values]
@@ -884,7 +884,7 @@ def Heatmap(data=None, coords=None, xlabel=None, ylabel=None, title=None,
 
     colorbar = {'title': {'text': colorlabel}}
     if log:
-        ticks_values = [10**e for e in range(-18,12)]
+        ticks_values = [10**e for e in range(-18, 12)]
         ticks_text = ["%.e" % t for t in ticks_values]
         colorbar['tickmode'] = "array"
         colorbar['tickvals'] = [float(np.log10(t)) for t in ticks_values]
